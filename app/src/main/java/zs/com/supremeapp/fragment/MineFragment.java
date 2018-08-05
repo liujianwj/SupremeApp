@@ -18,12 +18,20 @@ public class MineFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.initFragment(R.layout.fragment_mine);
-        return super.onCreateView(inflater, container, savedInstanceState);
+        if(mContentView == null){
+            super.initFragment(R.layout.fragment_mine);
+            return super.onCreateView(inflater, container, savedInstanceState);
+        }
+        return mContentView;
     }
 
     @Override
     void initView() {
+
+    }
+
+    @Override
+    void initData() {
 
     }
 }

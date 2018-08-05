@@ -28,6 +28,10 @@ public class BaseActivity extends AppCompatActivity{
         this.contentViewResourceId = contentViewResourceId;
     }
 
+    protected void initActivity(int contentViewResourceId){
+        this.contentViewResourceId = contentViewResourceId;
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

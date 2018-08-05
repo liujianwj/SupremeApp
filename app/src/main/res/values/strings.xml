@@ -15,4 +15,7 @@
     <string name="new_user_register">新用户注册</string>
     <string name="square">广场</string>
     <string name="publish">发布</string>
+    <string name="active_rule">活动规则</string>
+    <string name="need_too">我也想要</string>
+    <string name="dream_zan">为梦想点赞</string>
 </resources>

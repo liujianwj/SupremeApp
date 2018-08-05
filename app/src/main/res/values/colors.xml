@@ -13,6 +13,8 @@
     <color name="grey_4b">#4B4B4B</color>
     <color name="grey_ad">#B8ABAD</color>
     <color name="grey_7d">#7B7C7D</color>
+    <color name="grey_f1">#EFF0F1</color>
+    <color name="grey_d0">#D0D0D0</color>
 
     <color name="white">#ffffff</color>
     <color name="white_f0">#f0f0f0</color>
@@ -20,6 +22,8 @@
     <color name="common_red">#E12827</color>
     <color name="red_06">#E10006</color>
     <color name="red_27">#DF2927</color>
+    <color name="red_09">#FA7609</color>
+    <color name="red_009">#FD9009</color>
 
     <color name="black">#000000</color>
 

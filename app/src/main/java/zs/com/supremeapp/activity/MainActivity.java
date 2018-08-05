@@ -30,7 +30,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.initActivity(-1, R.layout.activity_main);
+        super.initActivity(R.layout.activity_main);
         super.onCreate(savedInstanceState);
 
         mTabHost.setup();

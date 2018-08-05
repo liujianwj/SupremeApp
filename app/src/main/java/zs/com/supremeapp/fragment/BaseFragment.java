@@ -20,7 +20,7 @@ public abstract class BaseFragment extends Fragment {
 
     private int contentId = -1;
 
-    private View contentView;
+    protected View mContentView;
     protected Context mContext;
 
     protected void initFragment(int contentId){
@@ -32,12 +32,15 @@ public abstract class BaseFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if(contentId != -1){
             mContext = this.getContext();
-            contentView = inflater.inflate(contentId, container, false);
-            ButterKnife.bind(this, contentView);
+            mContentView = inflater.inflate(contentId, container, false);
+            ButterKnife.bind(this, mContentView);
             initView();
+            initData();
         }
-        return contentView;
+        return mContentView;
     }
 
     abstract void initView();
+
+    abstract void initData();
 }

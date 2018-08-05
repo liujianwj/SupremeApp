@@ -25,9 +25,11 @@ public class HomeFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.initFragment(R.layout.fragment_home);
-        initData();
-        return super.onCreateView(inflater, container, savedInstanceState);
+        if(mContentView == null){
+            super.initFragment(R.layout.fragment_home);
+            return super.onCreateView(inflater, container, savedInstanceState);
+        }
+        return mContentView;
     }
 
     @Override
@@ -35,7 +37,8 @@ public class HomeFragment extends BaseFragment {
 
     }
 
-    private void initData(){
+    @Override
+    void initData(){
         new HomeApi().getContributor(new INetWorkCallback<List<ContributorDO>>() {
             @Override
             public void success(List<ContributorDO> contributorDOS, Object... objects) {
