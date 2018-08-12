@@ -20,10 +20,20 @@ import zs.com.supremeapp.R;
 public class DreamTitleRecycleAdapter extends RecyclerView.Adapter<DreamTitleRecycleAdapter.ViewHolder>{
     private Context context;
     private List<String> data;
+    private int selectPosition;
+    private View.OnClickListener onClickListener;
 
     public DreamTitleRecycleAdapter(Context context, List<String> data) {
         this.context = context;
         this.data = data;
+    }
+
+    public void setSelectPosition(int selectPosition) {
+        this.selectPosition = selectPosition;
+    }
+
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
     }
 
     @Override
@@ -34,6 +44,13 @@ public class DreamTitleRecycleAdapter extends RecyclerView.Adapter<DreamTitleRec
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.titleTv.setText(data.get(position));
+        if(position == selectPosition){
+            holder.titleTv.setTextColor(context.getResources().getColor(R.color.black));
+        }else {
+            holder.titleTv.setTextColor(context.getResources().getColor(R.color.grey_title));
+        }
+        holder.titleTv.setTag(position);
+        holder.titleTv.setOnClickListener(onClickListener);
     }
 
     @Override

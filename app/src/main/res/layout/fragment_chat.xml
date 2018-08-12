@@ -2,12 +2,71 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="chat" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_45"
+        android:background="@color/common_red"
+        android:paddingLeft="@dimen/spacing_8"
+        android:paddingRight="@dimen/spacing_8">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/phone_book"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/nearbyTv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:text="@string/nearby_people"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chatChangeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_white_left_cor_5"
+                android:text="@string/chat"
+                android:gravity="center"
+                android:paddingLeft="@dimen/spacing_20"
+                android:paddingRight="@dimen/spacing_20"
+                android:textSize="14sp"
+                android:textColor="@color/red_07" />
+
+            <TextView
+                android:id="@+id/interactChangeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_red_right_cor_5"
+                android:paddingLeft="@dimen/spacing_20"
+                android:paddingRight="@dimen/spacing_20"
+                android:text="@string/interact"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <zs.com.supremeapp.widget.NoScrollViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

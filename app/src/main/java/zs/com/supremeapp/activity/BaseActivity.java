@@ -2,6 +2,7 @@ package zs.com.supremeapp.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,7 +16,7 @@ import zs.com.supremeapp.R;
  * Created by liujian on 2018/8/4.
  */
 
-public class BaseActivity extends AppCompatActivity{
+public class BaseActivity extends FragmentActivity {
 
     private FrameLayout contentLayout;
     private View titleLayout;

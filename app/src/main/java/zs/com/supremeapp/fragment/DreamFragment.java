@@ -19,6 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.activity.DreamDetailActivity;
+import zs.com.supremeapp.activity.FriendStatusListActivity;
 import zs.com.supremeapp.adapter.DreamRecycleAdapter;
 import zs.com.supremeapp.adapter.DreamTitleRecycleAdapter;
 import zs.com.supremeapp.widget.WidgetDragTopLayout;
@@ -36,6 +37,8 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
     RecyclerView titleRv;
     @BindView(R.id.dragLayout)
     WidgetDragTopLayout dragLayout;
+    @BindView(R.id.publishLayout)
+    View publishLayout;
 
     private DreamRecycleAdapter dreamRecycleAdapter;
     private DreamTitleRecycleAdapter dreamTitleRecycleAdapter;
@@ -66,6 +69,7 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
         recycleView.setAdapter(dreamRecycleAdapter);
 
         dreamTitleRecycleAdapter = new DreamTitleRecycleAdapter(mContext, data);
+        dreamTitleRecycleAdapter.setOnClickListener(this);
         layoutManager = new LinearLayoutManager(mContext);
         layoutManager.setOrientation(OrientationHelper.HORIZONTAL);
         titleRv.setLayoutManager(layoutManager);
@@ -87,6 +91,8 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
+
+        publishLayout.setOnClickListener(this);
     }
 
     @Override
@@ -110,6 +116,15 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
     public void onClick(View view) {
         if(R.id.itemLayout == view.getId()){
             startActivity(new Intent(getActivity(), DreamDetailActivity.class));
+        }else if(view.getId() == R.id.titleTv){
+            Object tag = view.getTag();
+            if(tag instanceof Integer){
+                int position = (Integer) tag;
+                dreamTitleRecycleAdapter.setSelectPosition(position);
+                dreamTitleRecycleAdapter.notifyDataSetChanged();
+            }
+        }else if(view.getId() == R.id.publishLayout){
+            startActivity(new Intent(getActivity(), FriendStatusListActivity.class));
         }
     }
 }

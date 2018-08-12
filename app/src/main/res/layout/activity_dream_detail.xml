@@ -320,6 +320,7 @@
         android:paddingRight="@dimen/spacing_15">
 
         <TextView
+            android:id="@+id/needTooTv"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/spacing_40"
             android:background="@drawable/bg_red_cor_5"

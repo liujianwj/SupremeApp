@@ -1,16 +1,22 @@
 package zs.com.supremeapp.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import io.rong.imkit.RongIM;
+import io.rong.imlib.RongIMClient;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.fragment.ChatFragment;
 import zs.com.supremeapp.fragment.DreamFragment;
@@ -36,6 +42,49 @@ public class MainActivity extends BaseActivity {
         mTabHost.setup();
         mTabManager = new TabManager(this, mTabHost, android.R.id.tabcontent);
         initTab();
+        RongIM.setConnectionStatusListener(new RongIMClient.ConnectionStatusListener() {
+            @Override
+            public void onChanged(ConnectionStatus status) {
+                if (status == ConnectionStatus.TOKEN_INCORRECT) {
+                    jianConnect();
+                }
+            }
+        });
+        jianConnect();
+    }
+
+    public void jianConnect(){
+       // String token = "PjsSLMYPo9cyCjtMilWw3aYSYOP9+As0ItQwtH16mltTrcQONwKz8kvo1GGyckS4fxfOXT0xUc71W9/69JF+9Q==";//jian 654321
+
+        String token = "nolHg4ofNRUZpLHGUtKKEwkXinEBicBkpqMVOQWNI9jJJ+nUl6RvPtih6eBEhM+Yqb3eQVHXIEdZOl8pw+fKIg=="; //liujian 123456
+        RongIM.connect(token, new RongIMClient.ConnectCallback() {
+            /**
+             * Token 错误。可以从下面两点检查 1.  Token 是否过期，如果过期您需要向 App Server 重新请求一个新的 Token
+             *                            2.  token 对应的 appKey 和工程里设置的 appKey 是否一致
+             */
+            @Override
+            public void onTokenIncorrect() {
+                Toast.makeText(MainActivity.this, "Token 错误", Toast.LENGTH_SHORT).show();
+            }
+
+            /**
+             * 连接融云成功
+             * @param userid 当前 token 对应的用户 id
+             */
+            @Override
+            public void onSuccess(String userid) {
+                Toast.makeText(MainActivity.this, userid + "连接成功", Toast.LENGTH_SHORT).show();
+            }
+
+            /**
+             * 连接融云失败
+             * @param errorCode 错误码，可到官网 查看错误码对应的注释
+             */
+            @Override
+            public void onError(RongIMClient.ErrorCode errorCode) {
+                Toast.makeText(MainActivity.this, "连接失败" + errorCode, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initTab(){

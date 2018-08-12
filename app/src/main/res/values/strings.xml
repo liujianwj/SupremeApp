@@ -18,4 +18,7 @@
     <string name="active_rule">活动规则</string>
     <string name="need_too">我也想要</string>
     <string name="dream_zan">为梦想点赞</string>
+    <string name="phone_book">通讯录</string>
+    <string name="nearby_people">附近的人</string>
+    <string name="interact">互动</string>
 </resources>
