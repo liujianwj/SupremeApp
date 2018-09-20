@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import butterknife.ButterKnife;
+import zs.com.supremeapp.utils.ProcessDialogUtils;
 
 /**
  * fragment基类
@@ -23,6 +24,8 @@ public abstract class BaseFragment extends Fragment {
     protected View mContentView;
     protected Context mContext;
 
+    protected ProcessDialogUtils processDialogUtils;
+
     protected void initFragment(int contentId){
         this.contentId = contentId;
     }
@@ -34,6 +37,7 @@ public abstract class BaseFragment extends Fragment {
             mContext = this.getContext();
             mContentView = inflater.inflate(contentId, container, false);
             ButterKnife.bind(this, mContentView);
+            processDialogUtils = new ProcessDialogUtils(mContext);
             initView();
             initData();
         }
@@ -43,4 +47,17 @@ public abstract class BaseFragment extends Fragment {
     abstract void initView();
 
     abstract void initData();
+
+    protected void showProcessDialog(boolean isShow){
+        showProcessDialog(isShow, ProcessDialogUtils.LOAD_TYPE_COMMON);
+    }
+
+    protected void showProcessDialog(boolean isShow, Integer processType){
+        if(isShow){
+            processDialogUtils.createAndShow("正在加载", processType, ProcessDialogUtils.DEFAULT_SHOW_TIME, false, false);
+        }else {
+            processDialogUtils.dismissDialog();
+        }
+
+    }
 }

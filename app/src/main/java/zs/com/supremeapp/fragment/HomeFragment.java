@@ -1,19 +1,23 @@
 package zs.com.supremeapp.fragment;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.WebView;
 
 
-import java.util.List;
+import java.net.URLEncoder;
 
+import butterknife.BindView;
+import zs.com.supremeapp.BuildConfig;
 import zs.com.supremeapp.R;
-import zs.com.supremeapp.model.ContributorDO;
-import zs.com.supremeapp.network.HomeApi;
-import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.widget.webview.BridgeWebView;
 
 /**
  * 主页
@@ -21,6 +25,11 @@ import zs.com.supremeapp.network.INetWorkCallback;
  */
 
 public class HomeFragment extends BaseFragment {
+
+    private final String url = "http://app.cw2009.com/";
+
+    @BindView(R.id.webView)
+    BridgeWebView webView;
 
     @Nullable
     @Override
@@ -39,21 +48,28 @@ public class HomeFragment extends BaseFragment {
 
     @Override
     void initData(){
-        new HomeApi().getContributor(new INetWorkCallback<List<ContributorDO>>() {
-            @Override
-            public void success(List<ContributorDO> contributorDOS, Object... objects) {
-                for(ContributorDO contributor : contributorDOS){
-                    Log.d("login",contributor.getLogin());
-                    Log.d("contributions",contributor.getContributions());
-                }
+        synCookies(url);
+        webView.getSettings().setUserAgentString(formatWebViewUserAgent(webView));
+        webView.loadUrl(url);
+    }
 
-            }
+    public void synCookies(String url) {
+       // Uri uri = Uri.parse(url);
+        if (url.startsWith("http")) {  // 仅http类型需要埋cookie
+            CookieSyncManager.createInstance(mContext);
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.setAcceptCookie(true);
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
 
-            @Override
-            public void failure(int errorCode, String message) {
-                Log.d("failure", message);
-            }
-        });
+            cookieManager.setCookie(url,"userid=" + Platform.getInstance().getUsrId());
+            cookieManager.setCookie(url, "mobile=" + Platform.getInstance().getMobile());
+            CookieSyncManager.getInstance().sync();
+        }
+    }
+
+    private String formatWebViewUserAgent(WebView webView) {
+        return "cw2009/" + BuildConfig.VERSION_NAME + " " + webView.getSettings().getUserAgentString();
     }
 
 }

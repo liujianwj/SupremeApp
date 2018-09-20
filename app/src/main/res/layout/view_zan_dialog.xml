@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_white_c"
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <ImageView
+            android:id="@+id/close_iv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+            android:src="@drawable/btn_close" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="为Dream点赞"
+            android:textSize="22dp" />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/headImg"
+            android:layout_width="@dimen/spacing_80"
+            android:layout_height="@dimen/spacing_80"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            fresco:roundAsCircle="true" />
+
+        <TextView
+            android:id="@+id/more_zan_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:text="您当前总有15个点赞机会，如何获取更多机会。" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:paddingRight="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_grey_cor_5"
+                android:gravity="center"
+                android:text="1" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_grey_cor_5"
+                android:gravity="center"
+                android:layout_marginLeft="15dp"
+                android:text="10" />
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="2"
+                android:background="@drawable/bg_grey_cor_5"
+                android:gravity="center"
+                android:layout_marginLeft="15dp"
+                android:text="自定义" />
+
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/bg_red_cor_5_zan"
+            android:text="点赞 X 10"
+            android:gravity="center"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

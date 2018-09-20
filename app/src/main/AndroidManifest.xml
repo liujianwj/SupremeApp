@@ -59,6 +59,7 @@
         <activity android:name=".activity.DreamDetailActivity" />
         <activity android:name=".activity.DreamPublishActivity" />
         <activity android:name=".activity.NearbyPeopleActivity" />
+        <activity android:name=".activity.FriendStatusPublishActivity" />
         <activity android:name=".activity.FriendStatusListActivity" />
         <!--会话页面-->
         <activity

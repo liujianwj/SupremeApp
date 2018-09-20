@@ -3,25 +3,36 @@ package zs.com.supremeapp.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
+import okhttp3.FormBody;
+import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import zs.com.supremeapp.BuildConfig;
@@ -34,7 +45,7 @@ import zs.com.supremeapp.BuildConfig;
 public class HttpClient {
     private static HttpClient mHttpClient = null;
 
-    private static final String BASE_URL = "https://api.github.com/";
+    private static final String BASE_URL = "http://app.cw2009.com/api/";
 
     private static final int HTTP_RESPONSE_DISK_CACHE_MAX_SIZE = 10 * 1024 * 1024; //缓存文件大小
 
@@ -73,8 +84,17 @@ public class HttpClient {
        // okHttpClientBuilder.addInterceptor(headerInterceptor);
 
         //公共参数
-        AddQueryParameterInterceptor addQueryParameterInterceptor = new AddQueryParameterInterceptor();
-        okHttpClientBuilder.addInterceptor(addQueryParameterInterceptor);
+//        AddQueryParameterInterceptor addQueryParameterInterceptor = new AddQueryParameterInterceptor();
+//        okHttpClientBuilder.addInterceptor(addQueryParameterInterceptor);
+        //公共参数
+        long time = new Date().getTime();
+        BasicParamsInterceptor basicParamsInterceptor = new BasicParamsInterceptor.Builder()
+                //.addParam("sn", getSn(time))
+                .addParam("sn", "6d78616f74c40665264982dc634614bf714a2b24")
+              //  .addParam("time", String.valueOf(time))
+                .addParam("time", "123456")
+                .build();
+        okHttpClientBuilder.addInterceptor(basicParamsInterceptor);
 
         //Log信息拦截器
         if(BuildConfig.DEBUG){
@@ -108,33 +128,172 @@ public class HttpClient {
 
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MyGsonConverterFactory.create())
                 .client(okHttpClient);
         return builder;
     }
 
-    private static class AddQueryParameterInterceptor implements Interceptor {
+    public static class BasicParamsInterceptor implements Interceptor {
+
+        Map<String, String> queryParamsMap = new HashMap<>();
+        Map<String, String> paramsMap = new HashMap<>();
+        Map<String, String> headerParamsMap = new HashMap<>();
+        List<String> headerLinesList = new ArrayList<>();
+
+        private BasicParamsInterceptor() {
+
+        }
+
         @Override
         public Response intercept(Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            HttpUrl modifiedUrl = originalRequest.url().newBuilder()
-                    .addQueryParameter("platform", "android")
-                    .addQueryParameter("version", "1.0.0")
-                    .build();
-            Request request = originalRequest.newBuilder().url(modifiedUrl).build();
+
+            Request request = chain.request();
+            Request.Builder requestBuilder = request.newBuilder();
+
+            // process header params inject
+            Headers.Builder headerBuilder = request.headers().newBuilder();
+            if (headerParamsMap.size() > 0) {
+                Iterator iterator = headerParamsMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    headerBuilder.add((String) entry.getKey(), (String) entry.getValue());
+                }
+            }
+
+            if (headerLinesList.size() > 0) {
+                for (String line: headerLinesList) {
+                    headerBuilder.add(line);
+                }
+            }
+
+            requestBuilder.headers(headerBuilder.build());
+            // process header params end
+
+
+
+
+            // process queryParams inject whatever it's GET or POST
+            if (queryParamsMap.size() > 0) {
+                injectParamsIntoUrl(request, requestBuilder, queryParamsMap);
+            }
+            // process header params end
+
+
+
+
+            // process post body inject
+            if (request.method().equals("POST") && request.body().contentType().subtype().equals("x-www-form-urlencoded")) {
+                FormBody.Builder formBodyBuilder = new FormBody.Builder();
+                if (paramsMap.size() > 0) {
+                    Iterator iterator = paramsMap.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry entry = (Map.Entry) iterator.next();
+                        formBodyBuilder.add((String) entry.getKey(), (String) entry.getValue());
+                    }
+                }
+                RequestBody formBody = formBodyBuilder.build();
+                String postBodyString = bodyToString(request.body());
+                postBodyString += ((postBodyString.length() > 0) ? "&" : "") +  bodyToString(formBody);
+                requestBuilder.post(RequestBody.create(MediaType.parse("application/x-www-form-urlencoded;charset=UTF-8"), postBodyString));
+            } else {    // can't inject into body, then inject into url
+                injectParamsIntoUrl(request, requestBuilder, paramsMap);
+            }
+
+            request = requestBuilder.build();
             return chain.proceed(request);
         }
-    }
 
-    private static class HeaderInterceptor implements Interceptor{
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            Request request = originalRequest.newBuilder()
-                    .header("Accept", "application/json")
-                    .header("Token", "liujian")
-                    .build();
-            return chain.proceed(request);
+        // func to inject params into url
+        private void injectParamsIntoUrl(Request request, Request.Builder requestBuilder, Map<String, String> paramsMap) {
+            HttpUrl.Builder httpUrlBuilder = request.url().newBuilder();
+            if (paramsMap.size() > 0) {
+                Iterator iterator = paramsMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    httpUrlBuilder.addQueryParameter((String) entry.getKey(), (String) entry.getValue());
+                }
+            }
+
+            requestBuilder.url(httpUrlBuilder.build());
+        }
+
+        private static String bodyToString(final RequestBody request){
+            try {
+                final RequestBody copy = request;
+                final Buffer buffer = new Buffer();
+                if(copy != null)
+                    copy.writeTo(buffer);
+                else
+                    return "";
+                return buffer.readUtf8();
+            }
+            catch (final IOException e) {
+                return "did not work";
+            }
+        }
+
+        public static class Builder {
+
+            BasicParamsInterceptor interceptor;
+
+            public Builder() {
+                interceptor = new BasicParamsInterceptor();
+            }
+
+            public Builder addParam(String key, String value) {
+                interceptor.paramsMap.put(key, value);
+                return this;
+            }
+
+            public Builder addParamsMap(Map<String, String> paramsMap) {
+                interceptor.paramsMap.putAll(paramsMap);
+                return this;
+            }
+
+            public Builder addHeaderParam(String key, String value) {
+                interceptor.headerParamsMap.put(key, value);
+                return this;
+            }
+
+            public Builder addHeaderParamsMap(Map<String, String> headerParamsMap) {
+                interceptor.headerParamsMap.putAll(headerParamsMap);
+                return this;
+            }
+
+            public Builder addHeaderLine(String headerLine) {
+                int index = headerLine.indexOf(":");
+                if (index == -1) {
+                    throw new IllegalArgumentException("Unexpected header: " + headerLine);
+                }
+                interceptor.headerLinesList.add(headerLine);
+                return this;
+            }
+
+            public Builder addHeaderLinesList(List<String> headerLinesList) {
+                for (String headerLine: headerLinesList) {
+                    int index = headerLine.indexOf(":");
+                    if (index == -1) {
+                        throw new IllegalArgumentException("Unexpected header: " + headerLine);
+                    }
+                    interceptor.headerLinesList.add(headerLine);
+                }
+                return this;
+            }
+
+            public Builder addQueryParam(String key, String value) {
+                interceptor.queryParamsMap.put(key, value);
+                return this;
+            }
+
+            public Builder addQueryParamsMap(Map<String, String> queryParamsMap) {
+                interceptor.queryParamsMap.putAll(queryParamsMap);
+                return this;
+            }
+
+            public BasicParamsInterceptor build() {
+                return interceptor;
+            }
+
         }
     }
 
@@ -272,5 +431,64 @@ public class HttpClient {
 
             return originalResponse;
         }
+    }
+
+    //sha1(md5('cw2009com'.'E350D68BCD46861FEEFB3EFEEAE9F936'.time()));
+    public static String getSn(long time){
+        String snStr = "cw2009com" + "E350D68BCD46861FEEFB3EFEEAE9F936" + time;
+        String md5Sn = md5(snStr);
+        return encryptToSHA(md5Sn);
+    }
+
+    public static String md5(String string) {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+        char[] charArray = string.toCharArray();
+        byte[] byteArray = new byte[charArray.length];
+        for (int i = 0; i < charArray.length; i++) {
+            byteArray[i] = (byte) charArray[i];
+        }
+        byte[] md5Bytes = md5.digest(byteArray);
+        StringBuffer hexValue = new StringBuffer();
+        for (int i = 0; i < md5Bytes.length; i++) {
+            int val = ((int) md5Bytes[i]) & 0xff;
+            if (val < 16) {
+                hexValue.append("0");
+            }
+            hexValue.append(Integer.toHexString(val));
+        }
+        return hexValue.toString();
+    }
+
+    public static String encryptToSHA(String info) {
+        byte[] digesta = null;
+        try {
+            MessageDigest alga = MessageDigest.getInstance("SHA-1");
+            alga.update(info.getBytes());
+            digesta = alga.digest();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        String rs = byte2hex(digesta);
+        return rs;
+    }
+
+    public static String byte2hex(byte[] b) {
+        String hs = "";
+        String stmp = "";
+        for (int n = 0; n < b.length; n++) {
+            stmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
+            if (stmp.length() == 1) {
+                hs = hs + "0" + stmp;
+            } else {
+                hs = hs + stmp;
+            }
+        }
+        return hs;
     }
 }

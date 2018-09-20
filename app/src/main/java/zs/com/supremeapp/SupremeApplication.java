@@ -1,5 +1,6 @@
 package zs.com.supremeapp;
 
+import android.app.Application;
 import android.content.SharedPreferences;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
@@ -18,10 +19,13 @@ import io.rong.imlib.RongIMClient;
 
 public class SupremeApplication extends MultiDexApplication{
 
+    private static SupremeApplication supremeApplication;
+
+
     @Override
     public void onCreate() {
         super.onCreate();
-
+        supremeApplication = this;
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
                 .setDownsampleEnabled(true)
                 .build();
@@ -33,5 +37,9 @@ public class SupremeApplication extends MultiDexApplication{
         RongIM.setServerInfo("nav.cn.ronghub.com", "up.qbox.me");
         RongIM.init(this);
 
+    }
+
+    public static Application getInstance(){
+        return supremeApplication;
     }
 }

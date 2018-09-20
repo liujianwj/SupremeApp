@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name = "flow">
+        <attr name = "center" format = "boolean" />
+        <attr name = "fill" format = "boolean" />
+        <attr name = "fill_without_last_line" format = "boolean" />
+        <attr name = "max_line" format = "integer" />
+    </declare-styleable>
+</resources>

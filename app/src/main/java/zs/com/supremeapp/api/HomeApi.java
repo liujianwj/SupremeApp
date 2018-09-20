@@ -1,4 +1,4 @@
-package zs.com.supremeapp.network;
+package zs.com.supremeapp.api;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.GET;
 import zs.com.supremeapp.model.ContributorDO;
+import zs.com.supremeapp.network.HttpClient;
+import zs.com.supremeapp.network.INetWorkCallback;
 
 /**
  * 主页接口

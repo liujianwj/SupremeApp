@@ -15,6 +15,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.model.DreamDO;
 import zs.com.supremeapp.widget.CompletedView;
 
 /**
@@ -24,10 +25,10 @@ import zs.com.supremeapp.widget.CompletedView;
 public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapter.ViewHolder>{
 
     private Context context;
-    private List<String> data;
+    private List<DreamDO> data;
     private View.OnClickListener onClickListener;
 
-    public DreamRecycleAdapter(Context context, List<String> data) {
+    public DreamRecycleAdapter(Context context, List<DreamDO> data) {
         this.context = context;
         this.data = data;
     }
@@ -43,8 +44,13 @@ public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        DreamDO item = data.get(position);
+        holder.userNameTv.setText(item.getUser_name());
         holder.headImg.setImageURI(Uri.parse("res://zs.com.supremeapp/" + R.drawable.tangyan));
-        holder.serverHeadImg.setImageURI(Uri.parse("res://zs.com.supremeapp/" + R.drawable.tangyan));
+       // holder.headImg.setImageURI(item.getUser_avatar());
+        holder.dreamContentTv.setText(item.getDream_content());
+        holder.dreamTitleTv.setText(item.getDream_title());
+        holder.serverHeadImg.setImageURI(item.getUser_avatar());
         holder.completedView.setProgress(25);
         holder.itemLayout.setTag(position);
         holder.itemLayout.setOnClickListener(onClickListener);
@@ -65,6 +71,12 @@ public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapte
         CompletedView completedView;
         @BindView(R.id.itemLayout)
         View itemLayout;
+        @BindView(R.id.userNameTv)
+        TextView userNameTv;
+        @BindView(R.id.dreamContentTv)
+        TextView dreamContentTv;
+        @BindView(R.id.dreamTitleTv)
+        TextView dreamTitleTv;
 
         ViewHolder(View itemView) {
             super(itemView);

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/titleLayout"
@@ -38,6 +37,7 @@
 
 
         <ImageView
+            android:id="@+id/selectImage"
             android:layout_width="@dimen/spacing_30"
             android:layout_height="@dimen/spacing_30"
             android:layout_alignParentRight="true"
@@ -50,8 +50,9 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/titleLayout"
         android:divider="@null"
         android:listSelector="@color/transparent"
         android:scrollbars="none" />
 
-</LinearLayout>
+</RelativeLayout>

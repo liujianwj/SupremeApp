@@ -54,9 +54,9 @@ public class MainActivity extends BaseActivity {
     }
 
     public void jianConnect(){
-       // String token = "PjsSLMYPo9cyCjtMilWw3aYSYOP9+As0ItQwtH16mltTrcQONwKz8kvo1GGyckS4fxfOXT0xUc71W9/69JF+9Q==";//jian 654321
+        String token = "PjsSLMYPo9cyCjtMilWw3aYSYOP9+As0ItQwtH16mltTrcQONwKz8kvo1GGyckS4fxfOXT0xUc71W9/69JF+9Q==";//jian 654321
 
-        String token = "nolHg4ofNRUZpLHGUtKKEwkXinEBicBkpqMVOQWNI9jJJ+nUl6RvPtih6eBEhM+Yqb3eQVHXIEdZOl8pw+fKIg=="; //liujian 123456
+//        String token = "nolHg4ofNRUZpLHGUtKKEwkXinEBicBkpqMVOQWNI9jJJ+nUl6RvPtih6eBEhM+Yqb3eQVHXIEdZOl8pw+fKIg=="; //liujian 123456
         RongIM.connect(token, new RongIMClient.ConnectCallback() {
             /**
              * Token 错误。可以从下面两点检查 1.  Token 是否过期，如果过期您需要向 App Server 重新请求一个新的 Token

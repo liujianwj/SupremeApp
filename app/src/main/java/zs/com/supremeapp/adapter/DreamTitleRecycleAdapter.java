@@ -12,6 +12,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.model.CategoryDO;
 
 /**
  * Created by liujian on 2018/8/5.
@@ -19,17 +20,25 @@ import zs.com.supremeapp.R;
 
 public class DreamTitleRecycleAdapter extends RecyclerView.Adapter<DreamTitleRecycleAdapter.ViewHolder>{
     private Context context;
-    private List<String> data;
+    private List<CategoryDO> data;
     private int selectPosition;
     private View.OnClickListener onClickListener;
 
-    public DreamTitleRecycleAdapter(Context context, List<String> data) {
+    public DreamTitleRecycleAdapter(Context context, List<CategoryDO> data) {
         this.context = context;
         this.data = data;
     }
 
     public void setSelectPosition(int selectPosition) {
         this.selectPosition = selectPosition;
+    }
+
+    public int getSelectPosition() {
+        return selectPosition;
+    }
+
+    public String getSelectId(){
+        return data.get(selectPosition).getId();
     }
 
     public void setOnClickListener(View.OnClickListener onClickListener) {
@@ -43,7 +52,7 @@ public class DreamTitleRecycleAdapter extends RecyclerView.Adapter<DreamTitleRec
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.titleTv.setText(data.get(position));
+        holder.titleTv.setText(data.get(position).getCateName());
         if(position == selectPosition){
             holder.titleTv.setTextColor(context.getResources().getColor(R.color.black));
         }else {
@@ -55,7 +64,7 @@ public class DreamTitleRecycleAdapter extends RecyclerView.Adapter<DreamTitleRec
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{

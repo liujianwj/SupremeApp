@@ -42,7 +42,7 @@ public class InteractListPage extends BasePage implements View.OnClickListener{
         for(int i = 0; i < 20; i++){
             data.add("item" + i);
         }
-        dreamTitleRecycleAdapter = new DreamTitleRecycleAdapter(context, data);
+        dreamTitleRecycleAdapter = new DreamTitleRecycleAdapter(context, null);
         dreamTitleRecycleAdapter.setOnClickListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(OrientationHelper.HORIZONTAL);

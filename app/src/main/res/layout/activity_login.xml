@@ -37,6 +37,7 @@
                 android:src="@drawable/mobile_gray" />
 
             <EditText
+                android:id="@+id/phoneNumberEt"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/spacing_40"
                 android:layout_marginRight="@dimen/spacing_20"
@@ -45,6 +46,7 @@
                 android:layout_marginLeft="@dimen/spacing_5"
                 android:textColor="@color/grey_43"
                 android:textColorHint="@color/grey_9B"
+                android:inputType="phone"
                 android:textSize="14sp" />
 
         </LinearLayout>
@@ -59,6 +61,7 @@
 
 
             <ImageView
+                android:id="@+id/passwordIv"
                 android:layout_width="@dimen/spacing_25"
                 android:layout_height="@dimen/spacing_25"
                 android:layout_centerVertical="true"
@@ -66,6 +69,7 @@
                 android:src="@drawable/smscode_gray" />
 
             <EditText
+                android:id="@+id/passwordEt"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/spacing_40"
                 android:layout_weight="1"
@@ -78,13 +82,22 @@
                 android:textSize="14sp" />
             
             <TextView
+                android:id="@+id/secondTv"
                 android:layout_width="@dimen/spacing_70"
                 android:layout_height="@dimen/spacing_40"
                 android:text="@string/get"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:gravity="center"
+                android:visibility="visible"
                 android:background="@drawable/bg_grey_ad_cor_20" />
+
+            <!--<ImageView-->
+                <!--android:id="@+id/passwordEyeIv"-->
+                <!--android:layout_width="25dp"-->
+                <!--android:layout_height="25dp"-->
+                <!--android:src="@drawable/eye_close"-->
+                <!--android:layout_marginRight="15dp" />-->
 
         </LinearLayout>
 
@@ -99,26 +112,27 @@
             android:textColor="@color/white"
             android:textSize="18sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_20"
-            android:padding="@dimen/spacing_10"
-            android:text="@string/mobile_password_login"
-            android:textColor="@color/grey_88"
-            android:textSize="14sp" />
+        <!--<TextView-->
+            <!--android:id="@+id/loginTypeTv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="@dimen/spacing_20"-->
+            <!--android:padding="@dimen/spacing_10"-->
+            <!--android:text="@string/mobile_password_login"-->
+            <!--android:textColor="@color/grey_88"-->
+            <!--android:textSize="14sp" />-->
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/spacing_40"
-        android:layout_marginTop="@dimen/spacing_15"
-        android:background="@drawable/bg_grey_pane_20"
-        android:gravity="center"
-        android:text="@string/new_user_register"
-        android:textColor="@color/grey_4b"
-        android:layout_marginBottom="@dimen/spacing_30"
-        android:textSize="18sp" />
+    <!--<TextView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/spacing_40"-->
+        <!--android:layout_marginTop="@dimen/spacing_15"-->
+        <!--android:background="@drawable/bg_grey_pane_20"-->
+        <!--android:gravity="center"-->
+        <!--android:text="@string/new_user_register"-->
+        <!--android:textColor="@color/grey_4b"-->
+        <!--android:layout_marginBottom="@dimen/spacing_30"-->
+        <!--android:textSize="18sp" />-->
 
 
 </LinearLayout>

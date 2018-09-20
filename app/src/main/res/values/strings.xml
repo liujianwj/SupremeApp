@@ -12,6 +12,7 @@
     <string name="get">获取</string>
     <string name="login_now">立即登陆</string>
     <string name="mobile_password_login">用手机号 + 密码登录</string>
+    <string name="mobile_message_login">用手机号 + 短信验证码登录或注册</string>
     <string name="new_user_register">新用户注册</string>
     <string name="square">广场</string>
     <string name="publish">发布</string>
@@ -21,4 +22,9 @@
     <string name="phone_book">通讯录</string>
     <string name="nearby_people">附近的人</string>
     <string name="interact">互动</string>
+    <string name="password">密码</string>
+    <string name="phone_blank_tips">手机号码不能为空！</string>
+    <string name="phone_error_tips">请输入正确的手机号码！</string>
+    <string name="message_code_blank_tips">短信验证码不能为空！</string>
+    <string name="password_blank_tips">密码不能为空！</string>
 </resources>
