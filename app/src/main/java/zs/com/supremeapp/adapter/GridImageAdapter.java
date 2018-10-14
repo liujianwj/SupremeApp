@@ -36,6 +36,8 @@ public class GridImageAdapter extends
     private List<LocalMedia> list = new ArrayList<>();
     private int selectMax = 9;
     private Context context;
+    private OnImageDelListener onImageDelListener;
+
     /**
      * 点击添加图片跳转
      */
@@ -43,6 +45,10 @@ public class GridImageAdapter extends
 
     public interface onAddPicClickListener {
         void onAddPicClick();
+    }
+
+    public void setOnImageDelListener(OnImageDelListener onImageDelListener) {
+        this.onImageDelListener = onImageDelListener;
     }
 
     public GridImageAdapter(Context context, onAddPicClickListener mOnAddPicClickListener) {
@@ -128,11 +134,14 @@ public class GridImageAdapter extends
                 public void onClick(View view) {
                     int index = viewHolder.getAdapterPosition();
                     // 这里有时会返回-1造成数据下标越界,具体可参考getAdapterPosition()源码，
-                    // 通过源码分析应该是bindViewHolder()暂未绘制完成导致，知道原因的也可联系我~感谢
+                    // 通过源码分析应该是bindViewHolder()暂未绘制完成导致
                     if (index != RecyclerView.NO_POSITION) {
                         list.remove(index);
                         notifyItemRemoved(index);
                         notifyItemRangeChanged(index, list.size());
+                        if(onImageDelListener != null){
+                            onImageDelListener.onImageDel(index);
+                        }
                     }
                 }
             });
@@ -205,5 +214,9 @@ public class GridImageAdapter extends
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.mItemClickListener = listener;
+    }
+
+    public interface OnImageDelListener{
+        void onImageDel(int position);
     }
 }

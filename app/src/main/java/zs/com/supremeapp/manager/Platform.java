@@ -22,6 +22,15 @@ public class Platform {
 
     private String usrId;
     private String mobile;
+    private String imToken;
+
+    public String getImToken() {
+        return imToken;
+    }
+
+    public void setImToken(String imToken) {
+        this.imToken = imToken;
+    }
 
     public String getUsrId() {
         return usrId;

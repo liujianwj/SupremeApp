@@ -10,8 +10,12 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import zs.com.supremeapp.model.CategoryResultDO;
+import zs.com.supremeapp.model.DreamCommentResultDO;
 import zs.com.supremeapp.model.DreamsResultDO;
 import zs.com.supremeapp.model.GetoneResultDO;
+import zs.com.supremeapp.model.HaveZansResultDO;
+import zs.com.supremeapp.model.TopicResultDO;
+import zs.com.supremeapp.model.ZanPopStatusResultDO;
 import zs.com.supremeapp.network.HttpClient;
 import zs.com.supremeapp.network.INetWorkCallback;
 
@@ -25,6 +29,21 @@ public class DreamApi {
 
     public DreamApi() {
         this.dreamApi = HttpClient.newInstance().buildRetrofit().create(IDreamApi.class);
+    }
+
+    public void getDreamBanner(Map<String, String> params, final INetWorkCallback<TopicResultDO> callback){
+
+        dreamApi.getDreamBanner(params).enqueue(new Callback<TopicResultDO>() {
+            @Override
+            public void onResponse(Call<TopicResultDO> call, Response<TopicResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<TopicResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
     }
 
     public void getDreamCate(Map<String, String> params, final INetWorkCallback<CategoryResultDO> callback){
@@ -88,8 +107,102 @@ public class DreamApi {
         });
     }
 
+    public void createDream(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+
+        dreamApi.createDream(params).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void getComments(Map<String, String> params, final INetWorkCallback<DreamCommentResultDO> callback){
+
+        dreamApi.getComments(params).enqueue(new Callback<DreamCommentResultDO>() {
+            @Override
+            public void onResponse(Call<DreamCommentResultDO> call, Response<DreamCommentResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<DreamCommentResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void giveToZan(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+
+        dreamApi.giveToZan(params).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void getZanPopStatus(Map<String, String> params, final INetWorkCallback<ZanPopStatusResultDO> callback){
+
+        dreamApi.getZanPopStatus(params).enqueue(new Callback<ZanPopStatusResultDO>() {
+            @Override
+            public void onResponse(Call<ZanPopStatusResultDO> call, Response<ZanPopStatusResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ZanPopStatusResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void getFreeZan(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+
+        dreamApi.getFreeZan(params).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void haveZans(Map<String, String> params, final INetWorkCallback<HaveZansResultDO> callback){
+
+        dreamApi.haveZans(params).enqueue(new Callback<HaveZansResultDO>() {
+            @Override
+            public void onResponse(Call<HaveZansResultDO> call, Response<HaveZansResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<HaveZansResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
 
     public interface IDreamApi{
+
+        @FormUrlEncoded
+        @POST("dreams/topic.api")
+        Call<TopicResultDO> getDreamBanner(@FieldMap Map<String, String> params);
 
         @FormUrlEncoded
         @POST("dream/cate.api")
@@ -103,9 +216,36 @@ public class DreamApi {
         @POST("dreams/getone.api")
         Call<GetoneResultDO> getDreamDetail(@FieldMap Map<String, String> params);
 
-
         @FormUrlEncoded
         @POST("dreams/giveto/comment.api")
         Call<ResponseBody> sendComment(@FieldMap Map<String, String> params);
+
+        //发布Dream
+        @FormUrlEncoded
+        @POST("dreams/creat.api")
+        Call<ResponseBody> createDream(@FieldMap Map<String, String> params);
+
+        //获取dream评论
+        @FormUrlEncoded
+        @POST("dreams/getone/comments.api")
+        Call<DreamCommentResultDO> getComments(@FieldMap Map<String, String> params);
+
+        //dream点赞
+        @FormUrlEncoded
+        @POST("dreams/giveto/zhan.api")
+        Call<ResponseBody> giveToZan(@FieldMap Map<String, String> params);
+
+        //获取领取点赞数弹框状态
+        @FormUrlEncoded
+        @POST("user/get/zhan/pop.api")
+        Call<ZanPopStatusResultDO> getZanPopStatus(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("user/getfreezhan.api")
+        Call<ResponseBody> getFreeZan(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("getuser/havezhans.api")
+        Call<HaveZansResultDO> haveZans(@FieldMap Map<String, String> params);
     }
 }

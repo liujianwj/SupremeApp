@@ -4,11 +4,14 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.baidu.location.BDAbstractLocationListener;
@@ -27,9 +30,29 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.facebook.common.executors.CallerThreadExecutor;
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.api.ChatApi;
+import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.NearbyDO;
+import zs.com.supremeapp.model.NearbyResultDO;
+import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.utils.DataUtils;
 import zs.com.supremeapp.utils.TDFPermissionUtils;
 
 /**
@@ -37,18 +60,20 @@ import zs.com.supremeapp.utils.TDFPermissionUtils;
  * Created by liujian on 2018/8/10.
  */
 
-public class NearbyPeopleActivity extends BaseActivity {
+public class NearbyPeopleActivity extends BaseActivity implements View.OnClickListener{
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 88;
 
     @BindView(R.id.mmap)
     MapView mapView;
+    @BindView(R.id.backLayout)
+    View backLayout;
 
     public LocationClient mLocationClient = null;
     private MyLocationListener myListener = new MyLocationListener();
     private BaiduMap mBaiduMap;
     private boolean isFirstLoc = true;
-    private Marker mMarker;
+    private List<Marker> mMarkers = Collections.synchronizedList(new ArrayList<Marker>());
     private boolean isSettingBack;
 
     //需要进行检测的权限数组
@@ -60,13 +85,38 @@ public class NearbyPeopleActivity extends BaseActivity {
             //   Manifest.permission.READ_PHONE_STATE
     };
 
+    private List<NearbyDO> nearbyDOList = new ArrayList<>();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.initActivity(R.layout.activity_nearby_people);
         super.onCreate(savedInstanceState);
 
-        checkLocationPermission();
+        backLayout.setOnClickListener(this);
         initBaiduMap();
+        getNearby();
+    }
+
+    private void getNearby(){
+        showProcessDialog(true);
+        Map<String, String> params = new HashMap<>();
+        params.put("userid", Platform.getInstance().getUsrId());
+        new ChatApi().getNearby(params, new INetWorkCallback<NearbyResultDO>() {
+            @Override
+            public void success(NearbyResultDO nearbyResultDO, Object... objects) {
+                showProcessDialog(false);
+                if(nearbyResultDO != null && !DataUtils.isListEmpty(nearbyResultDO.getList())){
+                    nearbyDOList = nearbyResultDO.getList();
+                }
+                checkLocationPermission();
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(NearbyPeopleActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initBaiduMap(){
@@ -84,10 +134,10 @@ public class NearbyPeopleActivity extends BaseActivity {
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                if (marker.getZIndex() == mMarker.getZIndex()) {//判断是哪个marker
-                    //获取mMarker的信息
-                    Toast.makeText(NearbyPeopleActivity.this, "hha", Toast.LENGTH_SHORT).show();
-                }
+//                if (marker.getZIndex() == mMarker.getZIndex()) {//判断是哪个marker
+//                    //获取mMarker的信息
+//                    Toast.makeText(NearbyPeopleActivity.this, "hha", Toast.LENGTH_SHORT).show();
+//                }
                 return false;
             }
         });
@@ -257,25 +307,59 @@ public class NearbyPeopleActivity extends BaseActivity {
             /**
              * 绘制Marker，地图上常见的类似气球形状的图层
              */
-            MarkerOptions markerOptions = new MarkerOptions();//参数设置类
-            LatLng latLng = new LatLng(30.304994865689988, 120.14166956368213);
-            markerOptions.position(latLng);//marker坐标位置
-            BitmapDescriptor icon = BitmapDescriptorFactory
-                    .fromResource(R.drawable.delet_zhaopian_1x);
-            markerOptions.icon(icon);//marker图标，可以自定义
-            markerOptions.draggable(false);//是否可拖拽，默认不可拖拽
-            markerOptions.anchor(0.5f, 1.0f);//设置 marker覆盖物与位置点的位置关系，默认（0.5f, 1.0f）水平居中，垂直下对齐
-            markerOptions.alpha(0.8f);//marker图标透明度，0~1.0，默认为1.0
-            markerOptions.animateType(MarkerOptions.MarkerAnimateType.drop);//marker出现的方式，从天上掉下
-            markerOptions.flat(false);//marker突变是否平贴地面
-            markerOptions.zIndex(1);//index
+            for(NearbyDO nearbyDO : nearbyDOList){
+                makeMarker(nearbyDO);
+            }
 
-            // Marker动画效果
-            // markerOptions.icons(bitmapList);//如果需要显示动画，可以设置多张图片轮番显示
-            // markerOptions.period(10);//每个10ms显示bitmapList里面的图片
+        }
+    }
 
-            mMarker = (Marker) mBaiduMap.addOverlay(markerOptions);//在地图上增加mMarker图层
+    private void makeMarker(NearbyDO nearbyDO){
+        final MarkerOptions markerOptions = new MarkerOptions();//参数设置类
+        LatLng latLng = new LatLng(nearbyDO.getGps().getLat(), nearbyDO.getGps().getLng());
+        markerOptions.position(latLng);//marker坐标位置
+//        BitmapDescriptor icon = BitmapDescriptorFactory
+//                .fromResource(R.drawable.delet_zhaopian_1x);
 
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(nearbyDO.getUser_avatar())).setProgressiveRenderingEnabled(true).build();
+        DataSource<CloseableReference<CloseableImage>> dataSource = Fresco.getImagePipeline()
+                .fetchDecodedImage(imageRequest, this);
+        dataSource.subscribe(new BaseBitmapDataSubscriber() {
+
+            @Override
+            public void onNewResultImpl(Bitmap bitmap) {
+                if (bitmap != null){
+                    BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+
+                    markerOptions.icon(icon);//marker图标，可以自定义
+                    markerOptions.draggable(false);//是否可拖拽，默认不可拖拽
+                    markerOptions.anchor(0.5f, 1.0f);//设置 marker覆盖物与位置点的位置关系，默认（0.5f, 1.0f）水平居中，垂直下对齐
+                    markerOptions.alpha(0.8f);//marker图标透明度，0~1.0，默认为1.0
+                    markerOptions.animateType(MarkerOptions.MarkerAnimateType.drop);//marker出现的方式，从天上掉下
+                    markerOptions.flat(false);//marker突变是否平贴地面
+                    markerOptions.zIndex(1);//index
+
+                    // Marker动画效果
+                    // markerOptions.icons(bitmapList);//如果需要显示动画，可以设置多张图片轮番显示
+                    // markerOptions.period(10);//每个10ms显示bitmapList里面的图片
+
+                    Marker marker = (Marker) mBaiduMap.addOverlay(markerOptions);//在地图上增加mMarker图层
+                    mMarkers.add(marker);
+                }
+            }
+
+            @Override
+            public void onFailureImpl(DataSource dataSource) {
+
+            }
+        }, CallerThreadExecutor.getInstance());
+    }
+
+    @Override
+    public void onClick(View view) {
+        int viewId = view.getId();
+        if(viewId == R.id.backLayout){
+            finish();
         }
     }
 }

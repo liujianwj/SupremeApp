@@ -11,6 +11,7 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import zs.com.supremeapp.model.LoginResultDO;
+import zs.com.supremeapp.model.UserResultDO;
 import zs.com.supremeapp.network.HttpClient;
 import zs.com.supremeapp.network.INetWorkCallback;
 
@@ -54,6 +55,20 @@ public class LoginApi {
         });
     }
 
+    public void getUser(Map<String, String> params, final INetWorkCallback<UserResultDO> callback){
+        loginApi.getuser(params).enqueue(new Callback<UserResultDO>() {
+            @Override
+            public void onResponse(Call<UserResultDO> call, Response<UserResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<UserResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
     public interface ILoginApi{
 
         @FormUrlEncoded
@@ -63,5 +78,9 @@ public class LoginApi {
         @FormUrlEncoded
         @POST("login.api")
         Call<LoginResultDO> login(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("getuser.api")
+        Call<UserResultDO> getuser(@FieldMap Map<String, String> params);
     }
 }

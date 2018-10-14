@@ -3,6 +3,7 @@ package zs.com.supremeapp.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 
 import butterknife.ButterKnife;
 import zs.com.supremeapp.utils.ProcessDialogUtils;
+import zs.com.supremeapp.utils.TDFPermissionUtils;
 
 /**
  * fragment基类
@@ -59,5 +61,11 @@ public abstract class BaseFragment extends Fragment {
             processDialogUtils.dismissDialog();
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        TDFPermissionUtils.onRequestPermissionsResult(requestCode, grantResults);
     }
 }

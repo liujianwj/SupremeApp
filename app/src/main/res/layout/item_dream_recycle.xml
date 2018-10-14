@@ -16,6 +16,7 @@
         android:id="@+id/headImg"
         android:layout_width="@dimen/spacing_70"
         android:layout_height="@dimen/spacing_70"
+        fresco:placeholderImage="@drawable/default_avatar"
         fresco:roundAsCircle="true" />
 
     <LinearLayout
@@ -51,6 +52,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/zanTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="已收集 266 赞"
@@ -58,6 +60,7 @@
                 android:textSize="14sp" />
 
             <TextView
+                android:id="@+id/zanTargetTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/spacing_20"
@@ -79,6 +82,7 @@
                 android:id="@+id/serverHeadImg"
                 android:layout_width="@dimen/spacing_30"
                 android:layout_height="@dimen/spacing_30"
+                fresco:placeholderImage="@drawable/default_avatar"
                 fresco:roundAsCircle="true" />
 
             <TextView
@@ -110,6 +114,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/timeTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
@@ -141,10 +146,11 @@
         </RelativeLayout>
 
         <TextView
+            android:id="@+id/processTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:text="25%"
+            android:text="0%"
             android:textColor="@color/grey_7d"
             android:layout_marginTop="@dimen/spacing_2"
             android:textSize="12sp" />

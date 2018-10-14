@@ -26,26 +26,36 @@ import butterknife.BindView;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.activity.DreamDetailActivity;
+import zs.com.supremeapp.activity.DreamPublishActivity;
 import zs.com.supremeapp.activity.FriendStatusListActivity;
 import zs.com.supremeapp.activity.LoginActivity;
 import zs.com.supremeapp.adapter.DreamRecycleAdapter;
 import zs.com.supremeapp.adapter.DreamTitleRecycleAdapter;
 import zs.com.supremeapp.api.DreamApi;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.BannerDO;
 import zs.com.supremeapp.model.CategoryDO;
 import zs.com.supremeapp.model.CategoryResultDO;
 import zs.com.supremeapp.model.DreamDO;
 import zs.com.supremeapp.model.DreamsResultDO;
+import zs.com.supremeapp.model.TopicResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.observer.Observer;
+import zs.com.supremeapp.observer.ObserverKey;
+import zs.com.supremeapp.observer.SupplySubject;
 import zs.com.supremeapp.utils.DataUtils;
+import zs.com.supremeapp.widget.BannerViewPagerAdapter;
+import zs.com.supremeapp.widget.WidgetCycleViewPager;
 import zs.com.supremeapp.widget.WidgetDragTopLayout;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Dream
  * Created by liujian on 2018/8/4.
  */
 
-public class DreamFragment extends BaseFragment implements View.OnClickListener{
+public class DreamFragment extends BaseFragment implements View.OnClickListener, Observer{
 
     @BindView(R.id.recycleView)
     RecyclerView recycleView;
@@ -55,23 +65,62 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
     WidgetDragTopLayout dragLayout;
     @BindView(R.id.publishLayout)
     View publishLayout;
+    @BindView(R.id.banner_viewpager)
+    WidgetCycleViewPager bannerViewpager;
+    @BindView(R.id.indicatorLayout)
+    LinearLayout indicatorLayout;
+    @BindView(R.id.mineLayout)
+    LinearLayout mineLayout;
 
     private DreamRecycleAdapter dreamRecycleAdapter;
     private DreamTitleRecycleAdapter dreamTitleRecycleAdapter;
     private List<DreamDO> dreamDOList;
     private List<CategoryDO> categoryDOList;
     private int currentPage = 1;
-
+    private DreamApi dreamApi;
+    private boolean isNextStart;
+    private boolean isNeedRefresh;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        SupplySubject.getInstance().attach(this);
         if(mContentView == null){
             super.initFragment(R.layout.fragment_dream);
             return super.onCreateView(inflater, container, savedInstanceState);
         }
         return mContentView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(bannerViewpager != null && isNextStart){
+            bannerViewpager.start();
+        }
+        if(isNeedRefresh){
+            currentPage = 1;
+            isNeedRefresh = false;
+            getDreams(true);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(bannerViewpager != null){
+            bannerViewpager.stop();
+        }
+
+    }
+
+    @Override
+    public void onDestroy() {
+        SupplySubject.getInstance().detach(this);
+        super.onDestroy();
+    }
+
 
     /**
      * 获取最后一条展示的位置
@@ -158,13 +207,62 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
         });
 
         publishLayout.setOnClickListener(this);
+        mineLayout.setOnClickListener(this);
     }
 
     @Override
     void initData() {
+        dreamApi = new DreamApi();
+        getTopBanner();
+    }
+
+    private void getTopBanner(){
         Map<String, String> params = new HashMap<>();
         showProcessDialog(true);
-        new DreamApi().getDreamCate(params, new INetWorkCallback<CategoryResultDO>() {
+        dreamApi.getDreamBanner(params, new INetWorkCallback<TopicResultDO>() {
+            @Override
+            public void success(TopicResultDO topicResultDO, Object... objects) {
+                if(topicResultDO != null && !DataUtils.isListEmpty(topicResultDO.getList())){
+                    initBannerView(topicResultDO.getList());
+                    getDreamCategory();
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //初始化banner位
+    private void initBannerView(List<BannerDO> bannerList){
+        if(bannerList == null || bannerList.size() == 0)
+            return;
+        if(bannerList.size() > 5){
+            bannerList = bannerList.subList(0, 5);
+        }
+        BannerViewPagerAdapter bannerViewPagerAdapter = new BannerViewPagerAdapter(mContext, bannerList);
+        bannerViewPagerAdapter.setOnPagerItemClickListener(new BannerViewPagerAdapter.OnPagerItemClickListener() {
+            @Override
+            public void onPagerItemClick(View view, int position) {
+               // BannerDO bannerVo = bannerList.get(position);
+              //  goCampaignList(bannerVo);
+            }
+        });
+        bannerViewpager.setAdapter(bannerViewPagerAdapter);
+        bannerViewpager.setDataSize(bannerList.size());
+        indicatorLayout.removeAllViews();
+        bannerViewpager.setIndexIndicatorView(indicatorLayout, true);
+        bannerViewpager.setCurrentItem(1);
+        bannerViewpager.start();
+        isNextStart = true;
+    }
+
+    private void getDreamCategory(){
+        Map<String, String> params = new HashMap<>();
+        dreamApi.getDreamCate(params, new INetWorkCallback<CategoryResultDO>() {
 
             @Override
             public void success(CategoryResultDO categoryResultDO, Object... objects) {
@@ -188,12 +286,11 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
         Map<String, String> params = new HashMap<>();
         params.put("p", String.valueOf(currentPage));
         params.put("cateid", dreamTitleRecycleAdapter.getSelectId());
-      //  params.put("userid", Platform.getInstance().getUsrId());
-        params.put("userid", "1");
+        params.put("userid", Platform.getInstance().getUsrId());
         if(showLoading){
             showProcessDialog(true);
         }
-        new DreamApi().getDreams(params, new INetWorkCallback<DreamsResultDO>() {
+        dreamApi.getDreams(params, new INetWorkCallback<DreamsResultDO>() {
             @Override
             public void success(DreamsResultDO dreamsResultDO, Object... objects) {
                 showProcessDialog(false);
@@ -228,7 +325,8 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
-        if(R.id.itemLayout == view.getId()){
+        int viewId = view.getId();
+        if(R.id.itemLayout == viewId){
             Object object = view.getTag();
             if(object != null ){
                 int pos = (Integer) object;
@@ -236,9 +334,9 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
                 params.putString("dreamId", dreamDOList.get(pos).getDream_id());
                 Intent intent = new Intent(getActivity(), DreamDetailActivity.class);
                 intent.putExtras(params);
-                startActivity(intent);
+                startActivityForResult(intent, 8888);
             }
-        }else if(view.getId() == R.id.titleTv){
+        }else if(viewId == R.id.titleTv){
             Object tag = view.getTag();
             if(tag instanceof Integer){
                 int position = (Integer) tag;
@@ -250,8 +348,26 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener{
                 currentPage = 1;
                 getDreams(true);
             }
-        }else if(view.getId() == R.id.publishLayout){
+        }else if(viewId == R.id.publishLayout){
+            startActivityForResult(new Intent(getActivity(), DreamPublishActivity.class), 8888);
+        }else if(viewId == R.id.mineLayout){
             startActivity(new Intent(getActivity(), FriendStatusListActivity.class));
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 8888 && resultCode == RESULT_OK){
+            currentPage = 1;
+            getDreams(true);
+        }
+    }
+
+    @Override
+    public void update(Map<String, Object> params, String key) {
+        if(ObserverKey.DREA_FRAGMENT_UPDATE.equals(key)){
+            isNeedRefresh = true;
         }
     }
 }

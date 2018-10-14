@@ -12,4 +12,11 @@ public class DataUtils {
         return (list == null || list.isEmpty());
     }
 
+    public static String nullToEmpty(String value){
+        if(value == null){
+            return "";
+        }
+        return value;
+    }
+
 }

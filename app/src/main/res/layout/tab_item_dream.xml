@@ -11,8 +11,7 @@
 
         <ImageView
             android:id="@+id/tabIcon"
-            android:layout_width="@dimen/spacing_35"
-            android:layout_height="@dimen/spacing_35"
+            style="@style/tab_style"
             android:src="@drawable/nav_dream" />
 
         <TextView
@@ -20,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/grey_43"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:text="@string/dream" />
 
     </LinearLayout>

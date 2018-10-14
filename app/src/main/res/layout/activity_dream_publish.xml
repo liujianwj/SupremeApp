@@ -61,6 +61,7 @@
             android:paddingRight="@dimen/spacing_15">
 
             <EditText
+                android:id="@+id/dreamTitleEt"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/spacing_50"
                 android:layout_marginTop="@dimen/spacing_15"
@@ -78,12 +79,14 @@
                 android:orientation="horizontal">
 
                 <EditText
+                    android:id="@+id/moneyEt"
                     android:layout_width="120dp"
                     android:layout_height="@dimen/spacing_50"
                     android:background="@drawable/bg_grey_edit_cor_5"
                     android:gravity="center_vertical"
                     android:hint="梦想的价值"
                     android:paddingLeft="@dimen/spacing_10"
+                    android:inputType="number"
                     android:textSize="14sp" />
 
                 <TextView
@@ -123,6 +126,7 @@
             </LinearLayout>
 
             <EditText
+                android:id="@+id/contentEt"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:layout_marginTop="@dimen/spacing_10"
@@ -155,6 +159,7 @@
                 android:overScrollMode="never" />
 
             <TextView
+                android:id="@+id/publishTv"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:layout_marginTop="60dp"

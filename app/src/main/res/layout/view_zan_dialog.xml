@@ -33,6 +33,7 @@
             android:layout_height="@dimen/spacing_80"
             android:layout_gravity="center"
             android:layout_marginTop="15dp"
+            fresco:placeholderImage="@drawable/default_avatar"
             fresco:roundAsCircle="true" />
 
         <TextView
@@ -48,9 +49,11 @@
             android:layout_height="wrap_content"
             android:paddingLeft="5dp"
             android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
             android:paddingRight="5dp">
 
             <TextView
+                android:id="@+id/zan1Tv"
                 android:layout_width="0dp"
                 android:layout_height="35dp"
                 android:layout_weight="1"
@@ -59,28 +62,32 @@
                 android:text="1" />
 
             <TextView
+                android:id="@+id/zan10Tv"
                 android:layout_width="0dp"
                 android:layout_height="35dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_grey_cor_5"
+                android:background="@drawable/bg_red_cor_border_5"
                 android:gravity="center"
                 android:layout_marginLeft="15dp"
                 android:text="10" />
 
 
-            <TextView
+            <EditText
+                android:id="@+id/inputZanEt"
                 android:layout_width="0dp"
                 android:layout_height="35dp"
                 android:layout_weight="2"
                 android:background="@drawable/bg_grey_cor_5"
                 android:gravity="center"
                 android:layout_marginLeft="15dp"
-                android:text="自定义" />
+                android:inputType="number"
+                android:hint="自定义" />
 
 
         </LinearLayout>
 
         <TextView
+            android:id="@+id/zanTv"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="15dp"

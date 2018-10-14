@@ -2,6 +2,7 @@ package zs.com.supremeapp.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -18,10 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
+import io.rong.imkit.RongIM;
+import io.rong.imlib.RongIMClient;
+import io.rong.imlib.model.UserInfo;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.manager.Platform;
 import zs.com.supremeapp.model.LoginResultDO;
+import zs.com.supremeapp.model.UserResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
 import zs.com.supremeapp.api.LoginApi;
 import zs.com.supremeapp.utils.ShareUtils;
@@ -69,9 +74,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
         String userId = ShareUtils.getValue(sp, "userId", "");
+//        RongIM.setConnectionStatusListener(new RongIMClient.ConnectionStatusListener() {
+//            @Override
+//            public void onChanged(ConnectionStatus status) {
+//                if (status == ConnectionStatus.TOKEN_INCORRECT) {
+//                    imConnect();
+//                }
+//            }
+//        });
         if(!TextUtils.isEmpty(userId)){
             Platform.getInstance().setUsrId(userId);
             Platform.getInstance().setMobile(ShareUtils.getValue(sp, "mobile", ""));
+            Platform.getInstance().setImToken(ShareUtils.getValue(sp, "im_token", ""));
+            imConnect();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
@@ -122,9 +137,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 }
                 Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
                 Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
+                Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
                 SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
                 ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
                 ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());
+                ShareUtils.updateValue(sp, "im_token", loginResultDO.getMember().getIm_token());
+                imConnect();
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
             }
@@ -133,6 +151,71 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void failure(int errorCode, String message) {
                 showProcessDialog(false);
                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void imConnect(){
+        RongIM.connect(Platform.getInstance().getImToken(), new RongIMClient.ConnectCallback() {
+            /**
+             * Token 错误。可以从下面两点检查 1.  Token 是否过期，如果过期您需要向 App Server 重新请求一个新的 Token
+             *                            2.  token 对应的 appKey 和工程里设置的 appKey 是否一致
+             */
+            @Override
+            public void onTokenIncorrect() {
+//                Toast.makeText(LoginActivity.this.getApplicationContext(), "Token 错误", Toast.LENGTH_SHORT).show();
+                Log.d("rongyun_im", "Token 错误");
+            }
+
+            /**
+             * 连接融云成功
+             * @param userid 当前 token 对应的用户 id
+             */
+            @Override
+            public void onSuccess(String userid) {
+            //    Toast.makeText(LoginActivity.this.getApplicationContext(), userid + "连接成功", Toast.LENGTH_SHORT).show();
+                Log.d("rongyun_im", userid + "连接成功");
+            }
+
+            /**
+             * 连接融云失败
+             * @param errorCode 错误码，可到官网 查看错误码对应的注释
+             */
+            @Override
+            public void onError(RongIMClient.ErrorCode errorCode) {
+             //   Toast.makeText(LoginActivity.this.getApplicationContext(), "连接失败" + errorCode, Toast.LENGTH_SHORT).show();
+                Log.d("rongyun_im", "连接失败" + errorCode);
+            }
+        });
+        RongIM.setUserInfoProvider(new RongIM.UserInfoProvider() {
+            @Override
+            public UserInfo getUserInfo(String s) {
+                getUser(s);
+                Log.d("UserInfoProvider", s);
+                return null;
+            }
+        }, true);
+    }
+
+    private void getUser(String s){
+        Map<String, String> params = new HashMap<>();
+        params.put("userid", s);
+        new LoginApi().getUser(params, new INetWorkCallback<UserResultDO>() {
+            @Override
+            public void success(UserResultDO userResultDO, Object... objects) {
+                if(userResultDO != null && userResultDO.getUserInfo() != null){
+                    Uri uri = null;
+                    if(!TextUtils.isEmpty(userResultDO.getUserInfo().getAvatar())){
+                        uri = Uri.parse(userResultDO.getUserInfo().getAvatar());
+                    }
+                    UserInfo userInfo = new UserInfo(userResultDO.getUserInfo().getId(), userResultDO.getUserInfo().getName(), uri);
+                    RongIM.getInstance().refreshUserInfoCache(userInfo);
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+
             }
         });
     }

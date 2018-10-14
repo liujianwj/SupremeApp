@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SupremeApp</string>
+    <string name="app_name">至上</string>
 
     <string name="home">首页</string>
     <string name="chat">聊天</string>
@@ -27,4 +27,10 @@
     <string name="phone_error_tips">请输入正确的手机号码！</string>
     <string name="message_code_blank_tips">短信验证码不能为空！</string>
     <string name="password_blank_tips">密码不能为空！</string>
+    <string name="zan_num">已收集 %s 赞</string>
+    <string name="zan_target_num">目标 %s 赞</string>
+    <string name="end_day">最后期限：%s</string>
+    <string name="dream_title_input_tip">请输入Dream标题</string>
+    <string name="dream_content_input_tip">请输入Dream描述内容</string>
+    <string name="dream_money_input_tip">请输入Dream的价值</string>
 </resources>

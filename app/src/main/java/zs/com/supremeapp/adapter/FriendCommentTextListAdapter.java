@@ -7,25 +7,29 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.model.CommentDO;
 
 /**
  * Created by liujian on 2018/8/13.
  */
 
 public class FriendCommentTextListAdapter extends BaseAdapter{
-
     private Context context;
+    private List<CommentDO> commentDOS;
 
-    public FriendCommentTextListAdapter(Context context) {
+    public FriendCommentTextListAdapter(Context context, List<CommentDO> commentDOS) {
         this.context = context;
+        this.commentDOS = commentDOS;
     }
 
     @Override
     public int getCount() {
-        return 5;
+        return commentDOS.size();
     }
 
     @Override
@@ -48,7 +52,8 @@ public class FriendCommentTextListAdapter extends BaseAdapter{
         }else {
             holder = (ViewHolder) view.getTag();
         }
-        holder.textView.setText("jian：hahahha----"+position);
+        CommentDO item = commentDOS.get(position);
+        holder.textView.setText(item.getUser_name() + ": " + item.getComment_content());
         return view;
     }
 

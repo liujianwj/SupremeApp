@@ -18,6 +18,8 @@ public class FriendCommentPopup extends BasePopupWindow{
 
     @BindView(R.id.commentLayout)
     View commentLayout;
+    @BindView(R.id.zanLayout)
+    View zanLayout;
 
     private View.OnClickListener onClickListener;
     private int position;
@@ -55,8 +57,15 @@ public class FriendCommentPopup extends BasePopupWindow{
         commentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Toast.makeText(mActivity, "aa", Toast.LENGTH_SHORT).show();
-                if(onClickListener != null){
+                if (onClickListener != null){
+                    onClickListener.onClick(view);
+                }
+            }
+        });
+        zanLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (onClickListener != null){
                     onClickListener.onClick(view);
                 }
             }

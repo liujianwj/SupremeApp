@@ -11,12 +11,14 @@
         android:layout_height="200dp" />
 
     <LinearLayout
+        android:id="@+id/newsLayout"
         android:layout_width="110dp"
         android:layout_height="30dp"
         android:layout_below="@+id/bgImg"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/spacing_10"
         android:gravity="center_vertical"
+        android:visibility="gone"
         android:background="@drawable/bg_black_cor"
         android:orientation="horizontal">
 
@@ -37,8 +39,6 @@
             android:textSize="12sp"
             android:layout_marginLeft="@dimen/spacing_8"
             android:textColor="@color/white" />
-
-
 
     </LinearLayout>
 

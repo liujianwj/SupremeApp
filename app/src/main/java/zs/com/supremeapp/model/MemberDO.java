@@ -8,6 +8,15 @@ public class MemberDO extends BaseDO{
 
     private String name;
     private String mobile;
+    private String im_token;
+
+    public String getIm_token() {
+        return im_token;
+    }
+
+    public void setIm_token(String im_token) {
+        this.im_token = im_token;
+    }
 
     public String getName() {
         return name;

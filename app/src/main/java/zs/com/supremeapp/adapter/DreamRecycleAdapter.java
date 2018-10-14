@@ -3,6 +3,7 @@ package zs.com.supremeapp.adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.model.DreamDO;
+import zs.com.supremeapp.utils.DateUtils;
 import zs.com.supremeapp.widget.CompletedView;
 
 /**
@@ -46,12 +48,17 @@ public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapte
     public void onBindViewHolder(ViewHolder holder, int position) {
         DreamDO item = data.get(position);
         holder.userNameTv.setText(item.getUser_name());
-        holder.headImg.setImageURI(Uri.parse("res://zs.com.supremeapp/" + R.drawable.tangyan));
-       // holder.headImg.setImageURI(item.getUser_avatar());
+        holder.headImg.setImageURI(item.getDream_thumb());
         holder.dreamContentTv.setText(item.getDream_content());
         holder.dreamTitleTv.setText(item.getDream_title());
         holder.serverHeadImg.setImageURI(item.getUser_avatar());
-        holder.completedView.setProgress(25);
+        holder.timeTv.setText(DateUtils.toDate(item.getDream_endday(), DateUtils.DATE_FORMAT0));
+        holder.zanTv.setText(context.getResources().getString(R.string.zan_num, item.getDream_zhan()));
+        holder.zanTargetTv.setText(context.getResources().getString(R.string.zan_target_num, item.getDream_target_zhan()));
+        if(!TextUtils.isEmpty(item.getDream_status())){
+            holder.completedView.setProgress(Integer.valueOf(item.getDream_status()));
+            holder.processTv.setText(Integer.valueOf(item.getDream_status())/100 + "%");
+        }
         holder.itemLayout.setTag(position);
         holder.itemLayout.setOnClickListener(onClickListener);
     }
@@ -77,6 +84,14 @@ public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapte
         TextView dreamContentTv;
         @BindView(R.id.dreamTitleTv)
         TextView dreamTitleTv;
+        @BindView(R.id.timeTv)
+        TextView timeTv;
+        @BindView(R.id.zanTv)
+        TextView zanTv;
+        @BindView(R.id.zanTargetTv)
+        TextView zanTargetTv;
+        @BindView(R.id.processTv)
+        TextView processTv;
 
         ViewHolder(View itemView) {
             super(itemView);

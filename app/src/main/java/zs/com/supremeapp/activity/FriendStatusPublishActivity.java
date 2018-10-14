@@ -5,22 +5,39 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
+import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.GridImageAdapter;
+import zs.com.supremeapp.api.UploadApi;
+import zs.com.supremeapp.api.ZoneApi;
 import zs.com.supremeapp.manager.FullyGridLayoutManager;
+import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.UploadImageDO;
+import zs.com.supremeapp.model.UploadImageResultDO;
+import zs.com.supremeapp.model.UploadVideoResultDO;
+import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.utils.DataUtils;
 
 /**
  * Created by liujian on 2018/8/17.
@@ -32,15 +49,22 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
     RecyclerView recyclerView;
     @BindView(R.id.backLayout)
     LinearLayout backLayout;
+    @BindView(R.id.contentEt)
+    EditText contentEt;
+    @BindView(R.id.publishTv)
+    TextView publishTv;
 
     private GridImageAdapter adapter;
     private List<LocalMedia> selectList = new ArrayList<>();
+    private List<UploadImageDO> uploadImageDOS = new ArrayList<>();
+    private String videoPath;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         initActivity(R.layout.activity_friend_status_publish);
         super.onCreate(savedInstanceState);
         backLayout.setOnClickListener(this);
+        publishTv.setOnClickListener(this);
 
         FullyGridLayoutManager manager = new FullyGridLayoutManager(FriendStatusPublishActivity.this, 4, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);
@@ -114,8 +138,21 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
                     // 2.media.getCutPath();为裁剪后path，需判断media.isCut();是否为true
                     // 3.media.getCompressPath();为压缩后path，需判断media.isCompressed();是否为true
                     // 如果裁剪并压缩了，已取压缩路径为准，因为是先裁剪后压缩的
-                    for (LocalMedia media : selectList) {
-                        Log.i("图片-----》", media.getPath());
+                    if(!DataUtils.isListEmpty(selectList)){
+                        boolean isVideo = PictureMimeType.isVideo(selectList.get(0).getPictureType());
+                        if(isVideo){
+                            uploadImageDOS.clear();
+                            Log.i("视频-----》", selectList.get(0).getPath());
+                            uploadVideo(new File(selectList.get(0).getPath()));
+                        }else {
+                            videoPath = null;
+                            List<File> files = new ArrayList<>(selectList.size());
+                            for (LocalMedia media : selectList) {
+                                Log.i("图片-----》", media.getPath());
+                                files.add(new File(media.getPath()));
+                            }
+                            uploadImages(files);
+                        }
                     }
                     adapter.setList(selectList);
                     adapter.notifyDataSetChanged();
@@ -124,10 +161,83 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
         }
     }
 
+    private void uploadVideo(File file){
+        List<File> files = new ArrayList<>(1);
+        files.add(file);
+        showProcessDialog(true);
+        new UploadApi().uploadVideo(files, new INetWorkCallback<UploadVideoResultDO>() {
+            @Override
+            public void success(UploadVideoResultDO uploadVideoResultDO, Object... objects) {
+                showProcessDialog(false);
+                if(uploadVideoResultDO != null){
+                    videoPath = uploadVideoResultDO.getUri();
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(FriendStatusPublishActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void uploadImages(List<File> files){
+        showProcessDialog(true);
+        new UploadApi().uploadImages(files, new INetWorkCallback<UploadImageResultDO>() {
+            @Override
+            public void success(UploadImageResultDO responseBody, Object... objects) {
+                showProcessDialog(false);
+                if(responseBody != null && !DataUtils.isListEmpty(responseBody.getF())){
+                    uploadImageDOS = responseBody.getF();
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(FriendStatusPublishActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void createZone(){
+        Map<String, String> params = new HashMap<>();
+        params.put("userid", Platform.getInstance().getUsrId());
+        params.put("content", DataUtils.nullToEmpty(contentEt.getText().toString()));
+        if(!DataUtils.isListEmpty(uploadImageDOS)){
+            List<String> pics = new ArrayList<>();
+            for(UploadImageDO uploadImageDO : uploadImageDOS){
+                pics.add(uploadImageDO.getSource_url());
+            }
+            params.put("pics", new Gson().toJson(pics));
+        }
+        if(!TextUtils.isEmpty(videoPath)){
+            params.put("video", videoPath);
+        }
+        showProcessDialog(true);
+        new ZoneApi().createZone(params, new INetWorkCallback<ResponseBody>() {
+            @Override
+            public void success(ResponseBody responseBody, Object... objects) {
+                showProcessDialog(false);
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(FriendStatusPublishActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onClick(View view) {
         if (R.id.backLayout == view.getId()) {
             finish();
+        }else if(R.id.publishTv == view.getId()){
+            createZone();
         }
     }
 }

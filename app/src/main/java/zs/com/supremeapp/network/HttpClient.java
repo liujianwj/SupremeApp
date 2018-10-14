@@ -67,6 +67,7 @@ public class HttpClient {
         return mHttpClient;
     }
 
+
     public Retrofit buildRetrofit(){
         if(mRetrofit == null){
             mRetrofit = getRetrofitBuilder().build();
@@ -89,10 +90,10 @@ public class HttpClient {
         //公共参数
         long time = new Date().getTime();
         BasicParamsInterceptor basicParamsInterceptor = new BasicParamsInterceptor.Builder()
-                //.addParam("sn", getSn(time))
-                .addParam("sn", "6d78616f74c40665264982dc634614bf714a2b24")
-              //  .addParam("time", String.valueOf(time))
-                .addParam("time", "123456")
+                .addParam("sn", getSn(time))
+                //.addParam("sn", "6d78616f74c40665264982dc634614bf714a2b24")
+                .addParam("time", String.valueOf(time))
+                //  .addParam("time", "123456")
                 .build();
         okHttpClientBuilder.addInterceptor(basicParamsInterceptor);
 
@@ -170,16 +171,11 @@ public class HttpClient {
             // process header params end
 
 
-
-
             // process queryParams inject whatever it's GET or POST
             if (queryParamsMap.size() > 0) {
                 injectParamsIntoUrl(request, requestBuilder, queryParamsMap);
             }
             // process header params end
-
-
-
 
             // process post body inject
             if (request.method().equals("POST") && request.body().contentType().subtype().equals("x-www-form-urlencoded")) {
@@ -196,7 +192,7 @@ public class HttpClient {
                 postBodyString += ((postBodyString.length() > 0) ? "&" : "") +  bodyToString(formBody);
                 requestBuilder.post(RequestBody.create(MediaType.parse("application/x-www-form-urlencoded;charset=UTF-8"), postBodyString));
             } else {    // can't inject into body, then inject into url
-                injectParamsIntoUrl(request, requestBuilder, paramsMap);
+             //   injectParamsIntoUrl(request, requestBuilder, paramsMap);
             }
 
             request = requestBuilder.build();
@@ -297,141 +293,6 @@ public class HttpClient {
         }
     }
 
-    private static class CacheInterceptor implements Interceptor{
-        private Context context;
-
-        public CacheInterceptor(Context context) {
-            this.context = context.getApplicationContext();
-        }
-
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Cache cache = cache(context);
-            Request request = chain.request();
-            if(!NetWorkUtils.isNetworkActive(context)){
-                request = request.newBuilder()
-                        .cacheControl(CacheControl.FORCE_CACHE)
-                        .build();
-            }
-
-            Response originalResponse = chain.proceed(request);
-            if (NetWorkUtils.isNetworkActive(context)) {
-                int maxAge = 60;                  //在线缓存一分钟
-                return originalResponse.newBuilder()
-                        .removeHeader("Pragma")
-                        .removeHeader("Cache-Control")
-                        .header("Cache-Control", "public, max-age=" + maxAge)
-                        .build();
-
-            } else {
-                int maxStale = 60 * 60 * 24 * 4 * 7;     //离线缓存4周
-                return originalResponse.newBuilder()
-                        .removeHeader("Pragma")
-                        .removeHeader("Cache-Control")
-                        .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                        .build();
-            }
-        }
-    }
-
-
-
-    private static Cache cache(Context context) {
-        //设置缓存路径
-        final File baseDir = getDiskCacheDir(context);
-        final File cacheDir = new File(baseDir, "HttpResponseCache");
-        //设置缓存 10M
-        return new Cache(cacheDir, HTTP_RESPONSE_DISK_CACHE_MAX_SIZE);
-    }
-
-    //获取缓存文件
-    private static File getDiskCacheDir(Context context) {
-        File cacheFile = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
-                || !Environment.isExternalStorageRemovable()) {
-            // /sdcard/Android/data/<application package>/cache
-            cacheFile = context.getExternalCacheDir();
-        } else {
-            //  /data/data/<application package>/cache
-            cacheFile = context.getCacheDir();
-        }
-        return cacheFile;
-    }
-
-
-    public static class AddCookiesInterceptor implements Interceptor {
-        private Context context;
-        private String lang;
-
-        public AddCookiesInterceptor(Context context, String lang) {
-            super();
-            this.context = context;
-            this.lang = lang;
-
-        }
-
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            final Request.Builder builder = chain.request().newBuilder();
-            SharedPreferences sharedPreferences = context.getSharedPreferences("cookie", Context.MODE_PRIVATE);
-//            Observable.just(sharedPreferences.getString("cookie", ""))
-//                    .subscribe(new Action1<String>() {
-//                        @Override
-//                        public void call(String cookie) {
-//                            if (cookie.contains("lang=ch")){
-//                                cookie = cookie.replace("lang=ch","lang="+lang);
-//                            }
-//                            if (cookie.contains("lang=en")){
-//                                cookie = cookie.replace("lang=en","lang="+lang);
-//                            }
-//                            //添加cookie
-////                        Log.d("http", "AddCookiesInterceptor"+cookie);
-//                            builder.addHeader("cookie", cookie);
-//                        }
-//                    });
-            return chain.proceed(builder.build());
-        }
-    }
-
-    public class ReceivedCookiesInterceptor implements Interceptor {
-        private Context context;
-        SharedPreferences sharedPreferences;
-
-        public ReceivedCookiesInterceptor(Context context) {
-            super();
-            this.context = context;
-            sharedPreferences = context.getSharedPreferences("cookie", Context.MODE_PRIVATE);
-        }
-
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Response originalResponse = chain.proceed(chain.request());
-            Log.d("http", "originalResponse" + originalResponse.toString());
-            if (!originalResponse.headers("set-cookie").isEmpty()) {
-                final StringBuffer cookieBuffer = new StringBuffer();
-//                Observable.from(originalResponse.headers("set-cookie"))
-//                        .map(new Func1<String, String>() {
-//                            @Override
-//                            public String call(String s) {
-//                                String[] cookieArray = s.split(";");
-//                                return cookieArray[0];
-//                            }
-//                        })
-//                        .subscribe(new Action1<String>() {
-//                            @Override
-//                            public void call(String cookie) {
-//                                cookieBuffer.append(cookie).append(";");
-//                            }
-//                        });
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("cookie", cookieBuffer.toString());
-                Log.d("http", "ReceivedCookiesInterceptor" + cookieBuffer.toString());
-                editor.apply();
-            }
-
-            return originalResponse;
-        }
-    }
 
     //sha1(md5('cw2009com'.'E350D68BCD46861FEEFB3EFEEAE9F936'.time()));
     public static String getSn(long time){
