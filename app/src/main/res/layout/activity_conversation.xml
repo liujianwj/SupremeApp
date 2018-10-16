@@ -52,6 +52,17 @@
                 android:textColor="@color/white"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/userHomeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:gravity="center"
+                android:text="个人主页"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
         </RelativeLayout>
 
         <fragment

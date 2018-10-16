@@ -1,5 +1,7 @@
 package zs.com.supremeapp.model;
 
+import java.util.List;
+
 /**
  * Created by liujian on 2018/9/7.
  */
@@ -9,6 +11,7 @@ public class DreamDO extends BaseDO{
     private String user_name;
     private String user_avatar;
     private String user_status;
+    private String user_company;
     private String dream_id;
     private String dream_userid;
     private String dream_title;
@@ -21,6 +24,32 @@ public class DreamDO extends BaseDO{
     private String dream_video;
     private String dream_thumb;
     private String dream_status;
+    private String dream_video_thumb;
+    private List<String> ablum;
+
+    public List<String> getAblum() {
+        return ablum;
+    }
+
+    public void setAblum(List<String> ablum) {
+        this.ablum = ablum;
+    }
+
+    public String getDream_video_thumb() {
+        return dream_video_thumb;
+    }
+
+    public void setDream_video_thumb(String dream_video_thumb) {
+        this.dream_video_thumb = dream_video_thumb;
+    }
+
+    public String getUser_company() {
+        return user_company;
+    }
+
+    public void setUser_company(String user_company) {
+        this.user_company = user_company;
+    }
 
     public String getUser_id() {
         return user_id;

@@ -12,6 +12,7 @@ import retrofit2.http.POST;
 import zs.com.supremeapp.model.CategoryResultDO;
 import zs.com.supremeapp.model.DreamCommentResultDO;
 import zs.com.supremeapp.model.DreamsResultDO;
+import zs.com.supremeapp.model.GetOneZanResultDO;
 import zs.com.supremeapp.model.GetoneResultDO;
 import zs.com.supremeapp.model.HaveZansResultDO;
 import zs.com.supremeapp.model.TopicResultDO;
@@ -197,6 +198,21 @@ public class DreamApi {
         });
     }
 
+    public void getOneZan(Map<String, String> params, final INetWorkCallback<GetOneZanResultDO> callback){
+
+        dreamApi.getOneZan(params).enqueue(new Callback<GetOneZanResultDO>() {
+            @Override
+            public void onResponse(Call<GetOneZanResultDO> call, Response<GetOneZanResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<GetOneZanResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
 
     public interface IDreamApi{
 
@@ -247,5 +263,9 @@ public class DreamApi {
         @FormUrlEncoded
         @POST("getuser/havezhans.api")
         Call<HaveZansResultDO> haveZans(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("dreams/getone/zhan.api")
+        Call<GetOneZanResultDO> getOneZan(@FieldMap Map<String, String> params);
     }
 }

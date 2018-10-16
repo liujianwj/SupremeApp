@@ -1,5 +1,6 @@
 package zs.com.supremeapp.fragment;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +18,11 @@ import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMWeb;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +35,7 @@ import zs.com.supremeapp.activity.DreamDetailActivity;
 import zs.com.supremeapp.activity.DreamPublishActivity;
 import zs.com.supremeapp.activity.FriendStatusListActivity;
 import zs.com.supremeapp.activity.LoginActivity;
+import zs.com.supremeapp.activity.MineDreamActivity;
 import zs.com.supremeapp.adapter.DreamRecycleAdapter;
 import zs.com.supremeapp.adapter.DreamTitleRecycleAdapter;
 import zs.com.supremeapp.api.DreamApi;
@@ -44,6 +51,7 @@ import zs.com.supremeapp.observer.Observer;
 import zs.com.supremeapp.observer.ObserverKey;
 import zs.com.supremeapp.observer.SupplySubject;
 import zs.com.supremeapp.utils.DataUtils;
+import zs.com.supremeapp.utils.TDFPermissionUtils;
 import zs.com.supremeapp.widget.BannerViewPagerAdapter;
 import zs.com.supremeapp.widget.WidgetCycleViewPager;
 import zs.com.supremeapp.widget.WidgetDragTopLayout;
@@ -71,6 +79,8 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener,
     LinearLayout indicatorLayout;
     @BindView(R.id.mineLayout)
     LinearLayout mineLayout;
+    @BindView(R.id.dreamSquareLayout)
+    LinearLayout dreamSquareLayout;
 
     private DreamRecycleAdapter dreamRecycleAdapter;
     private DreamTitleRecycleAdapter dreamTitleRecycleAdapter;
@@ -208,6 +218,7 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener,
 
         publishLayout.setOnClickListener(this);
         mineLayout.setOnClickListener(this);
+        dreamSquareLayout.setOnClickListener(this);
     }
 
     @Override
@@ -286,7 +297,7 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener,
         Map<String, String> params = new HashMap<>();
         params.put("p", String.valueOf(currentPage));
         params.put("cateid", dreamTitleRecycleAdapter.getSelectId());
-        params.put("userid", Platform.getInstance().getUsrId());
+      //  params.put("userid", Platform.getInstance().getUsrId());
         if(showLoading){
             showProcessDialog(true);
         }
@@ -351,9 +362,12 @@ public class DreamFragment extends BaseFragment implements View.OnClickListener,
         }else if(viewId == R.id.publishLayout){
             startActivityForResult(new Intent(getActivity(), DreamPublishActivity.class), 8888);
         }else if(viewId == R.id.mineLayout){
+            startActivity(new Intent(getActivity(), MineDreamActivity.class));
+        }else if(viewId == R.id.dreamSquareLayout){
             startActivity(new Intent(getActivity(), FriendStatusListActivity.class));
         }
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

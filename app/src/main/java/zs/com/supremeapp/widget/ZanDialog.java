@@ -57,9 +57,16 @@ public class ZanDialog extends Dialog{
         private TextView zanTv;
         private SimpleDraweeView headImg;
         private String headImgUri;
+        private OnGetMoreZanListener onGetMoreZanListener;
+
 
         private int zanNum = 10;
         private int havaZanNum = 0;
+
+        public Builder setOnGetMoreZanListener(OnGetMoreZanListener onGetMoreZanListener) {
+            this.onGetMoreZanListener = onGetMoreZanListener;
+            return this;
+        }
 
         public Builder setOnClickListener(View.OnClickListener onClickListener) {
             this.onClickListener = onClickListener;
@@ -110,7 +117,10 @@ public class ZanDialog extends Dialog{
 
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(context, "hah", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(context, "hah", Toast.LENGTH_SHORT).show();
+                    if(onGetMoreZanListener != null){
+                        onGetMoreZanListener.onGetMoreZan();
+                    }
                 }
             }, text.length() - 9, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             moreZanTv.setHighlightColor(Color.TRANSPARENT); //设置点击后的颜色为透明，否则会一直出现高亮
@@ -186,5 +196,9 @@ public class ZanDialog extends Dialog{
             });
             return zanDialog;
         }
+    }
+
+    public interface OnGetMoreZanListener{
+        void onGetMoreZan();
     }
 }

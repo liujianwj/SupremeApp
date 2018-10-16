@@ -9,6 +9,10 @@ import android.util.Log;
 import com.baidu.mapapi.SDKInitializer;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.umeng.commonsdk.UMConfigure;
+import com.umeng.socialize.PlatformConfig;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareConfig;
 
 import io.rong.imkit.RongIM;
 import io.rong.imlib.RongIMClient;
@@ -33,6 +37,15 @@ public class SupremeApplication extends MultiDexApplication{
 
         //百度地图
         SDKInitializer.initialize(getApplicationContext());
+
+        //友盟
+//        UMConfigure.init(this,"5bc55761f1f5560826000214"
+//                ,"umeng",UMConfigure.DEVICE_TYPE_PHONE,"");
+        UMConfigure.init(this,UMConfigure.DEVICE_TYPE_PHONE,null);
+        UMShareAPI.get(this);
+        UMConfigure.setLogEnabled(true);
+        PlatformConfig.setWeixin("wxc8bdf92a27854741", "37605cf7fbf4d417aca40b04f4c6e44f");
+
 
         RongIM.setServerInfo("nav.cn.ronghub.com", "up.qbox.me");
         RongIM.init(this);

@@ -47,6 +47,12 @@
 
         <activity android:name=".activity.LoginActivity"/>
 
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <!--会话列表-->
         <activity
             android:name=".activity.MainActivity"
@@ -70,6 +76,8 @@
         <activity android:name=".activity.FriendStatusPublishActivity" />
         <activity android:name=".activity.FriendStatusListActivity" />
         <activity android:name=".activity.FriendNewsListActivity" />
+        <activity android:name=".activity.WebActivity" />
+        <activity android:name=".activity.MineDreamActivity" />
         <activity android:name=".activity.FriendNewsDetailActivity"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
 
@@ -105,6 +113,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/rc_file_path" />
         </provider>
+
+        <meta-data android:value="5bc55761f1f5560826000214" android:name="UMENG_APPKEY"/>
+        <meta-data android:value="umeng" android:name="UMENG_CHANNEL"/>
 
     </application>
 

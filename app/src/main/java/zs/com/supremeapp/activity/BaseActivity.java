@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.manager.ActivityStackManager;
 import zs.com.supremeapp.utils.ProcessDialogUtils;
 import zs.com.supremeapp.utils.TDFPermissionUtils;
 
@@ -41,6 +42,7 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityStackManager.getInstance().addStackActivity(this);
         setContentView(R.layout.activity_base);
         contentLayout = findViewById(R.id.contentLayout);
         attachContentView();
@@ -82,6 +84,7 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         processDialogUtils.dismissDialog();
+        ActivityStackManager.getInstance().popActivity(this);
         super.onDestroy();
     }
 }

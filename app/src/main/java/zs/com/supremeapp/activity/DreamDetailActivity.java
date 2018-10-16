@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.umeng.commonsdk.debug.E;
 
 
 import java.lang.ref.WeakReference;
@@ -39,6 +40,7 @@ import zs.com.supremeapp.manager.Platform;
 import zs.com.supremeapp.model.DreamCommentDO;
 import zs.com.supremeapp.model.DreamCommentResultDO;
 import zs.com.supremeapp.model.DreamDO;
+import zs.com.supremeapp.model.GetOneZanResultDO;
 import zs.com.supremeapp.model.GetoneResultDO;
 import zs.com.supremeapp.model.HaveZansResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
@@ -46,6 +48,7 @@ import zs.com.supremeapp.observer.ObserverKey;
 import zs.com.supremeapp.observer.SupplySubject;
 import zs.com.supremeapp.utils.DataUtils;
 import zs.com.supremeapp.utils.DateUtils;
+import zs.com.supremeapp.utils.UMHelpUtils;
 import zs.com.supremeapp.widget.CompletedView;
 import zs.com.supremeapp.widget.ZanDialog;
 
@@ -64,6 +67,12 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
     LinearLayout zanLayout;
     @BindView(R.id.listView)
     ListView listView;
+    @BindView(R.id.activeRuleTv)
+    View activeRuleTv;
+    @BindView(R.id.reportIv)
+    View reportIv;
+    @BindView(R.id.shareImg)
+    View shareImg;
 
     private TextView dreamContentTv;
     private TextView userNameTv;
@@ -77,15 +86,18 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
     private TextView zanTargetTv;
     private TextView endDayTv;
     private RecyclerView supportRecyclerView;
+    private TextView userCompanyTv;
+    private SimpleDraweeView imageView1;
+    private SimpleDraweeView imageView2;
 
     private String dreamId;
     private EditText commentEt;
-    private MyHandler myHandler = new MyHandler(this);
 
     private DreamDetailCommentAdapter dreamDetailCommentAdapter;
     private List<DreamCommentDO> commentDOList;
     private SupportRecyclerAdapter supportRecyclerAdapter;
-    private DreamDO dreamDO;;
+    private List<GetOneZanResultDO.SupportDO> supportDOList;
+    private DreamDO dreamDO;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,10 +117,15 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         zanTargetTv = headerView.findViewById(R.id.zanTargetTv);
         endDayTv = headerView.findViewById(R.id.endDayTv);
         supportRecyclerView = headerView.findViewById(R.id.supportRecyclerView);
+        userCompanyTv = headerView.findViewById(R.id.userCompanyTv);
+        imageView1 = headerView.findViewById(R.id.imageView1);
+        imageView2 = headerView.findViewById(R.id.imageView2);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         supportRecyclerView.setLayoutManager(linearLayoutManager);
-        supportRecyclerAdapter = new SupportRecyclerAdapter(this);
+
+        supportDOList = new ArrayList<>();
+        supportRecyclerAdapter = new SupportRecyclerAdapter(this, supportDOList);
         supportRecyclerView.setAdapter(supportRecyclerAdapter);
         listView.addHeaderView(headerView);
 
@@ -116,10 +133,14 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         needTooTv.setOnClickListener(this);
         zanLayout.setOnClickListener(this);
         commentLayout.setOnClickListener(this);
+        activeRuleTv.setOnClickListener(this);
+        reportIv.setOnClickListener(this);
+        shareImg.setOnClickListener(this);
 
         commentDOList = new ArrayList<>();
         dreamDetailCommentAdapter = new DreamDetailCommentAdapter(this, commentDOList);
         listView.setAdapter(dreamDetailCommentAdapter);
+
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
@@ -163,11 +184,38 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         new DreamApi().getComments(params, new INetWorkCallback<DreamCommentResultDO>() {
             @Override
             public void success(DreamCommentResultDO dreamCommentResultDO, Object... objects) {
-                showProcessDialog(false);
                 if(dreamCommentResultDO != null && !DataUtils.isListEmpty(dreamCommentResultDO.getList())){
                     commentDOList.clear();
                     commentDOList.addAll(dreamCommentResultDO.getList());
                     dreamDetailCommentAdapter.notifyDataSetChanged();
+                    getOneZan(false);
+                }else {
+                    showProcessDialog(false);
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(DreamDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getOneZan(boolean isShowProcessDialog){
+        Map<String, String> params = new HashMap<>();
+        params.put("dreamid", dreamId);
+        if(isShowProcessDialog){
+            showProcessDialog(true);
+        }
+        new DreamApi().getOneZan(params, new INetWorkCallback<GetOneZanResultDO>() {
+            @Override
+            public void success(GetOneZanResultDO getOneZanResultDO, Object... objects) {
+                showProcessDialog(false);
+                if(getOneZanResultDO != null && !DataUtils.isListEmpty(getOneZanResultDO.getList())){
+                    supportDOList.clear();
+                    supportDOList.addAll(getOneZanResultDO.getList());
+                    supportRecyclerAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -239,6 +287,14 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
                     ZanDialog zanDialog = new ZanDialog.Builder(DreamDetailActivity.this)
                             .setHeadImgUri(dreamDO.getUser_avatar())
                             .setHavaZanNum(haveZansResultDO.getMember_zhan().getZhans())
+                            .setOnGetMoreZanListener(new ZanDialog.OnGetMoreZanListener() {
+                                @Override
+                                public void onGetMoreZan() {
+                                    Intent intent = new Intent(DreamDetailActivity.this, WebActivity.class);
+                                    intent.putExtra("url", "http://app.cw2009.com/h5/how_to_get_zhan.html");
+                                    DreamDetailActivity.this.startActivity(intent);
+                                }
+                            })
                             .setOnClickListener(DreamDetailActivity.this).create();
                     zanDialog.show();
                 }
@@ -252,45 +308,54 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         });
     }
 
-    private Bitmap bitmap = null;
-
-    private void loadVideo(final String url){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-                try {
-                    //这里要用FileProvider获取的Uri
-                    if (url.contains("http")) {
-                        retriever.setDataSource(url, new HashMap<String, String>());
-                    } else {
-                        retriever.setDataSource(url);
-                    }
-                    bitmap = retriever.getFrameAtTime();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                } finally {
-                    try {
-                        retriever.release();
-                    } catch (RuntimeException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                myHandler.sendEmptyMessage(1);
-              //  showImageMessage(bitmap, positionTag, vv);
-            }
-        }).start();
-    }
-
     private void initView(DreamDO dreamDO){
         dreamTitleTv.setText(dreamDO.getDream_title());
         dreamContentTv.setText(dreamDO.getDream_content());
         userNameTv.setText(dreamDO.getUser_name());
         headImg.setImageURI(dreamDO.getUser_avatar());
+        userCompanyTv.setText(dreamDO.getUser_company());
         zanTv.setText(getResources().getString(R.string.zan_num, dreamDO.getDream_zhan()));
         zanTargetTv.setText(getResources().getString(R.string.zan_target_num, dreamDO.getDream_target_zhan()));
         endDayTv.setText(getResources().getString(R.string.end_day, DateUtils.toDate(dreamDO.getDream_endday(), DateUtils.DATE_FORMAT0)));
+        if(!TextUtils.isEmpty(dreamDO.getDream_video_thumb())){
+            videoIv.setVisibility(View.VISIBLE);
+            imageView1.setVisibility(View.GONE);
+            imageView2.setVisibility(View.GONE);
+            videoIv.setImageURI(dreamDO.getDream_video_thumb());
+        }else {
+            if(!DataUtils.isListEmpty(dreamDO.getAblum())){
+                switch (dreamDO.getAblum().size()){
+                    case 1:
+                        videoIv.setVisibility(View.VISIBLE);
+                        imageView1.setVisibility(View.GONE);
+                        imageView2.setVisibility(View.GONE);
+
+                        videoIv.setImageURI(dreamDO.getAblum().get(0));
+                        break;
+                    case 2:
+                        videoIv.setVisibility(View.VISIBLE);
+                        imageView1.setVisibility(View.VISIBLE);
+                        imageView2.setVisibility(View.GONE);
+
+                        videoIv.setImageURI(dreamDO.getAblum().get(0));
+                        imageView1.setImageURI(dreamDO.getAblum().get(1));
+                        break;
+                    default:
+                        videoIv.setVisibility(View.VISIBLE);
+                        imageView1.setVisibility(View.VISIBLE);
+                        imageView2.setVisibility(View.VISIBLE);
+
+                        videoIv.setImageURI(dreamDO.getAblum().get(0));
+                        imageView1.setImageURI(dreamDO.getAblum().get(1));
+                        imageView2.setImageURI(dreamDO.getAblum().get(2));
+                        break;
+                }
+            }else {
+                videoIv.setVisibility(View.INVISIBLE);
+                imageView1.setVisibility(View.GONE);
+                imageView2.setVisibility(View.GONE);
+            }
+        }
         if(!TextUtils.isEmpty(dreamDO.getDream_status())){
             completedView.setProgress(Integer.valueOf(dreamDO.getDream_status()));
             processTv.setText(Integer.valueOf(dreamDO.getDream_status())/100 + "%");
@@ -330,30 +395,19 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         }else if(R.id.zanTv == view.getId()){
             int num = (Integer) view.getTag();
             giveToZan(num);
-        }
-    }
-
-    public void showVideoImage(){
-        if(bitmap != null){
-            videoIv.setImageBitmap(bitmap);
-        }
-    }
-
-    static class MyHandler extends Handler{
-        WeakReference<DreamDetailActivity> mWeakReference;
-        public MyHandler(DreamDetailActivity activity) {
-            mWeakReference=new WeakReference<DreamDetailActivity>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final DreamDetailActivity activity = mWeakReference.get();
-            if(activity!=null) {
-                if (msg.what == 1) {
-                   // noteBookAdapter.notifyDataSetChanged();
-                    activity.showVideoImage();
-                }
+        }else if(R.id.activeRuleTv == view.getId()){
+            Intent intent = new Intent(DreamDetailActivity.this, WebActivity.class);
+            intent.putExtra("url", "http://app.cw2009.com/h5/deram/rule.html");
+            DreamDetailActivity.this.startActivity(intent);
+        }else if(R.id.reportIv == view.getId()){
+            Intent intent = new Intent(DreamDetailActivity.this, WebActivity.class);
+            intent.putExtra("url", "http://app.cw2009.com/h5/deram/report.html");
+            DreamDetailActivity.this.startActivity(intent);
+        }else if(R.id.shareImg == view.getId()){
+            if(dreamDO != null){
+                UMHelpUtils.shareWebToWX(this, "http://app.cw2009.com/app/download.html", dreamDO.getDream_title(), dreamDO.getDream_content());
             }
         }
     }
+
 }

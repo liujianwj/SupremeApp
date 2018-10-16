@@ -23,7 +23,7 @@ import zs.com.supremeapp.widget.webview.BridgeWebView;
 public class MineFragment extends BaseFragment{
 
     //http://app.cw2009.com/ucenter.html
-    private final String url = "http://app.cw2009.com/ucenter.html";
+    private final String url = "http://app.cw2009.com/choosemyidentity.html";
 
     @BindView(R.id.webView)
     BridgeWebView webView;

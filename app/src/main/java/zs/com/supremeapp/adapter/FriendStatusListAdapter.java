@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -81,6 +82,23 @@ public class FriendStatusListAdapter extends BaseAdapter {
         }else {
             holder.contentTv.setVisibility(View.GONE);
         }
+
+        if(!TextUtils.isEmpty(item.getVideo())){
+            holder.singleImg.setVisibility(View.VISIBLE);
+            holder.imageGridView.setVisibility(View.GONE);
+            holder.singleImg.setImageURI(item.getVideo());
+        }else {
+            if(!DataUtils.isListEmpty(item.getAlbum())) {
+                holder.singleImg.setVisibility(View.GONE);
+                holder.imageGridView.setVisibility(View.VISIBLE);
+                FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(context, item.getAlbum());
+                holder.imageGridView.setAdapter(friendStatusImageGridAdapter);
+            }else {
+                holder.singleImg.setVisibility(View.GONE);
+                holder.imageGridView.setVisibility(View.GONE);
+            }
+        }
+
         holder.commentImg.setTag(position);
         holder.commentImg.setOnClickListener(onClickListener);
 
@@ -137,6 +155,10 @@ public class FriendStatusListAdapter extends BaseAdapter {
         View commentGroup;
         @BindView(R.id.timeTv)
         TextView timeTv;
+        @BindView(R.id.singleImg)
+        SimpleDraweeView singleImg;
+        @BindView(R.id.imageGridView)
+        GridView imageGridView;
 
         public ViewHolder(View itemView) {
             ButterKnife.bind(this, itemView);

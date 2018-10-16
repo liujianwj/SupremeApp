@@ -114,6 +114,20 @@ public class ZoneApi {
         });
     }
 
+    public void haveRead(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+       zoneApi.haveRead(params).enqueue(new Callback<ResponseBody>() {
+           @Override
+           public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+               callback.success(response.body());
+           }
+
+           @Override
+           public void onFailure(Call<ResponseBody> call, Throwable t) {
+               callback.failure(-1, t.getMessage());
+           }
+       });
+    }
+
     public interface IZoneApi{
 
         //获取朋友圈列表

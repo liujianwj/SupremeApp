@@ -58,6 +58,8 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
     EditText moneyEt;
     @BindView(R.id.contentEt)
     EditText contentEt;
+    @BindView(R.id.activeRuleTv)
+    TextView activeRuleTv;
 
     private GridImageAdapter adapter;
     private List<LocalMedia> selectList = new ArrayList<>();
@@ -71,6 +73,7 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
 
         backLayout.setOnClickListener(this);
         publishTv.setOnClickListener(this);
+        activeRuleTv.setOnClickListener(this);
 
         FullyGridLayoutManager manager = new FullyGridLayoutManager(DreamPublishActivity.this, 4, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);
@@ -224,6 +227,10 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
             if(checkData()){
                 publishDream();
             }
+        }else if(R.id.activeRuleTv == viewId){
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra("url", "http://app.cw2009.com/h5/deram/rule.html");
+            this.startActivity(intent);
         }
     }
 

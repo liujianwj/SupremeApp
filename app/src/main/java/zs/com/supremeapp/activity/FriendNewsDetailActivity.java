@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import butterknife.BindView;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.FriendCommentTextListAdapter;
+import zs.com.supremeapp.adapter.FriendStatusImageGridAdapter;
 import zs.com.supremeapp.api.ZoneApi;
 import zs.com.supremeapp.manager.Platform;
 import zs.com.supremeapp.model.ZoneDO;
@@ -61,6 +63,11 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
     TextView sendTv;
     @BindView(R.id.commentEt)
     EditText commentEt;
+    @BindView(R.id.singleImg)
+    SimpleDraweeView singleImg;
+    @BindView(R.id.imageGridView)
+    GridView imageGridView;
+
 
     private FriendCommentPopup friendCommentPopup;
     private String zoneId;
@@ -106,6 +113,22 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
         }else {
             contentTv.setVisibility(View.GONE);
         }
+        if(!TextUtils.isEmpty(item.getVideo())){
+            singleImg.setVisibility(View.VISIBLE);
+            imageGridView.setVisibility(View.GONE);
+            singleImg.setImageURI(item.getVideo());
+        }else {
+            if(!DataUtils.isListEmpty(item.getAlbum())) {
+                singleImg.setVisibility(View.GONE);
+                imageGridView.setVisibility(View.VISIBLE);
+                FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(this, item.getAlbum());
+                imageGridView.setAdapter(friendStatusImageGridAdapter);
+            }else {
+                singleImg.setVisibility(View.GONE);
+                imageGridView.setVisibility(View.GONE);
+            }
+        }
+
         commentImg.setOnClickListener(this);
 
         timeTv.setText(DateUtils.getTimeRange(item.getCreatTime()));

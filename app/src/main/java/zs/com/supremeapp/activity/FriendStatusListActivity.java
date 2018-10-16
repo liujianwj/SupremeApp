@@ -14,6 +14,7 @@ import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -56,6 +57,7 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
     View backLayout;
 
     private View newsLayout;
+    private TextView newsNumTv;
 
     private FriendStatusListAdapter friendStatusListAdapter;
     private FriendCommentPopup friendCommentPopup;
@@ -73,9 +75,10 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
         View headerView = LayoutInflater.from(this).inflate(R.layout.view_friend_status_list_header, listView, false);
         SimpleDraweeView bgImg = headerView.findViewById(R.id.bgImg);
         SimpleDraweeView headImg = headerView.findViewById(R.id.headImg);
-        bgImg.setImageURI(Uri.parse("res://zs.com.supremeapp/" + R.drawable.tangyan));
-        headImg.setImageURI(Uri.parse("res://zs.com.supremeapp/" + R.drawable.tangyan));
+        bgImg.setImageURI(Platform.getInstance().getZone_pic());
+        headImg.setImageURI(Platform.getInstance().getAvatar());
         newsLayout = headerView.findViewById(R.id.newsLayout);
+        newsNumTv = headerView.findViewById(R.id.newsNumTv);
         newsLayout.setOnClickListener(this);
         listView.addHeaderView(headerView);
 
@@ -105,6 +108,11 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
 
         zoneApi = new ZoneApi();
         getZoneList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         getNewmsgs();
     }
 
@@ -148,7 +156,12 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
                     if(!DataUtils.isListEmpty(newmsgsResultDO.getMcms_comments())){
                         count += newmsgsResultDO.getMcms_comments().size();
                     }
-                    newsLayout.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+                    if(count > 0){
+                        newsLayout.setVisibility(View.VISIBLE);
+                        newsNumTv.setText(String.valueOf(count));
+                    }else {
+                        newsLayout.setVisibility(View.GONE);
+                    }
                 }
             }
 
@@ -255,12 +268,30 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
         } else if(viewId == R.id.backLayout){
             finish();
         } else if(viewId == R.id.newsLayout){ // 查看消息列表
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("newmsgsResultDO", newmsgsResultDO);
-            Intent intent = new Intent(this, FriendNewsListActivity.class);
-            intent.putExtras(bundle);
-            startActivity(intent);
+            haveRead();
         }
+    }
+
+    private void haveRead(){
+        Map<String, String> params = new HashMap<>();
+        showProcessDialog(true);
+        zoneApi.haveRead(params, new INetWorkCallback<ResponseBody>() {
+            @Override
+            public void success(ResponseBody responseBody, Object... objects) {
+                showProcessDialog(false);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("newmsgsResultDO", newmsgsResultDO);
+                Intent intent = new Intent(FriendStatusListActivity.this, FriendNewsListActivity.class);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(FriendStatusListActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private int getY(View view){

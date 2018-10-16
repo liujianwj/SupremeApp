@@ -138,6 +138,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
                 Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
                 Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
+                Platform.getInstance().setAvatar(loginResultDO.getMember().getAvatar());
+                Platform.getInstance().setZone_pic(loginResultDO.getMember().getZone_pic());
                 SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
                 ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
                 ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());

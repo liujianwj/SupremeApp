@@ -1,6 +1,7 @@
 package zs.com.supremeapp.activity;
 
-import android.app.Dialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
@@ -15,18 +16,19 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import io.rong.imlib.RongIMClient;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.api.DreamApi;
 import zs.com.supremeapp.fragment.ChatFragment;
 import zs.com.supremeapp.fragment.DreamFragment;
-import zs.com.supremeapp.fragment.FindFragment;
-import zs.com.supremeapp.fragment.HomeFragment;
-import zs.com.supremeapp.fragment.MineFragment;
+import zs.com.supremeapp.fragment.WebFragment;
+import zs.com.supremeapp.manager.ActivityStackManager;
 import zs.com.supremeapp.manager.Platform;
 import zs.com.supremeapp.manager.TabManager;
 import zs.com.supremeapp.model.ZanPopStatusResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.utils.ShareUtils;
 import zs.com.supremeapp.widget.GetZanDialog;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener{
@@ -84,11 +86,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     private void initTab(){
         tabList.clear();
-        mTabManager.addTab(getTabSpecView("home", R.layout.tab_item_home), HomeFragment.class, null);
+        Bundle bundle = new Bundle();
+        bundle.putString("url", "http://app.cw2009.com/");
+        mTabManager.addTab(getTabSpecView("home", R.layout.tab_item_home), WebFragment.class, bundle);
         mTabManager.addTab(getTabSpecView("chat", R.layout.tab_item_chat), ChatFragment.class, null);
-        mTabManager.addTab(getTabSpecView("find", R.layout.tab_item_find), FindFragment.class, null);
+        bundle = new Bundle();
+        bundle.putString("url", "http://app.cw2009.com/finder.html");
+        mTabManager.addTab(getTabSpecView("find", R.layout.tab_item_find), WebFragment.class, bundle);
         mTabManager.addTab(getTabSpecView("dream", R.layout.tab_item_dream), DreamFragment.class, null);
-        mTabManager.addTab(getTabSpecView("mine", R.layout.tab_item_mine), MineFragment.class, null);
+        bundle = new Bundle();
+        bundle.putString("url", "http://app.cw2009.com/choosemyidentity.html");
+        mTabManager.addTab(getTabSpecView("mine", R.layout.tab_item_mine), WebFragment.class, bundle);
         mTabManager.setOnTabChangListener(new TabManager.OnTabChangListener() {
             @Override
             public boolean change(String tabId, TabManager.TabInfo tabInfo) {
@@ -166,6 +174,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         int viewId = view.getId();
         if(viewId == R.id.getZanTv){ //获取点赞数
             getFreeZan();
+        }
+    }
+
+    private long exitTime = 0;
+
+    @Override
+    public void onBackPressed() {
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        } else {
+            ActivityStackManager.getInstance().finishAllActivity();
+            RongIMClient.getInstance().logout();
+            System.exit(0);
+            super.onBackPressed();
         }
     }
 }

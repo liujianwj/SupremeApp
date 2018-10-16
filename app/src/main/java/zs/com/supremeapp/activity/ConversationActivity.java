@@ -1,6 +1,7 @@
 package zs.com.supremeapp.activity;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -23,6 +24,10 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
     TextView nameTv;
     @BindView(R.id.backLayout)
     View backLayout;
+    @BindView(R.id.userHomeTv)
+    View userHomeTv;
+
+    private String mTargetId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,10 +35,12 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
 
         String title = getIntent().getData().getQueryParameter("title");
+        mTargetId = getIntent().getData().getQueryParameter("targetId");
         if(!TextUtils.isEmpty(title)){
             nameTv.setText(title);
         }
-
+        backLayout.setOnClickListener(this);
+        userHomeTv.setOnClickListener(this);
     }
 
     @Override
@@ -41,6 +48,11 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         int viewId = view.getId();
         if(viewId == R.id.backLayout){
             finish();
+        }else if(viewId == R.id.userHomeTv){
+            String url = "http://app.cw2009.com/s/" + mTargetId + ".html";
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
         }
     }
 }

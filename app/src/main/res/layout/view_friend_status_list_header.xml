@@ -7,6 +7,8 @@
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/bgImg"
+        fresco:placeholderImage="@drawable/default_avatar"
+        fresco:placeholderImageScaleType="fitXY"
         android:layout_width="match_parent"
         android:layout_height="200dp" />
 
@@ -23,6 +25,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/newsNumTv"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:background="@drawable/bg_white_c"
@@ -48,6 +51,7 @@
         android:layout_height="80dp"
         android:layout_alignParentRight="true"
         android:layout_marginTop="160dp"
+        fresco:placeholderImage="@drawable/default_avatar"
         fresco:roundAsCircle="true" />
 
 
