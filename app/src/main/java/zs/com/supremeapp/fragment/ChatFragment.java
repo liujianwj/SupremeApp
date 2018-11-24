@@ -1,24 +1,27 @@
 package zs.com.supremeapp.fragment;
 
-import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,21 +31,18 @@ import java.util.Map;
 import butterknife.BindView;
 import io.rong.imkit.RongContext;
 import io.rong.imkit.fragment.ConversationListFragment;
-import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import zs.com.supremeapp.R;
-import zs.com.supremeapp.activity.LoginActivity;
 import zs.com.supremeapp.activity.NearbyPeopleActivity;
+import zs.com.supremeapp.activity.PhoneBookActivity;
 import zs.com.supremeapp.adapter.ConversationListAdapterEx;
-import zs.com.supremeapp.adapter.PagerBaseAdapter;
 import zs.com.supremeapp.api.ChatApi;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.ContrastDO;
 import zs.com.supremeapp.model.ContrastResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
-import zs.com.supremeapp.page.BasePage;
-import zs.com.supremeapp.page.ChatListPage;
-import zs.com.supremeapp.page.InteractListPage;
 import zs.com.supremeapp.utils.DataUtils;
+import zs.com.supremeapp.utils.SerializeToFlatByte;
 import zs.com.supremeapp.utils.TDFPermissionUtils;
 import zs.com.supremeapp.widget.PhoneBookDialog;
 
@@ -70,6 +70,7 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
 
     private List<Fragment> mFragment = new ArrayList<>();
     private Conversation.ConversationType[] mConversationsTypes = null;
+    private InteractFragment interactFragment;
 
     /**
      * 会话列表的fragment
@@ -131,7 +132,8 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
 
         Fragment conversationList = initConversationList();
         mFragment.add(conversationList);
-        mFragment.add(new MineFragment());
+        interactFragment = new InteractFragment();
+        mFragment.add(interactFragment);
         FragmentPagerAdapter fragmentPagerAdapter = new FragmentPagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
@@ -145,6 +147,25 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
         };
         viewPager.setAdapter(fragmentPagerAdapter);
         viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(position == 1 && interactFragment.isFirst()){
+                    interactFragment.setFirst(false);
+                    interactFragment.initData();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     private Fragment initConversationList() {
@@ -176,11 +197,6 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
         }
     }
 
-
-
-
-
-
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
@@ -208,25 +224,40 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
                 @Override
                 public void onPermissionGranted() {
 
-                    String[] contacts = getContacts();
-                    StringBuilder mobiles = new StringBuilder();
-                    Log.d("contacts", contacts.toString());
+                    final List<ContrastDO> contrastDOS = getContacts();
+                    List<String> mobiles = new ArrayList<>();
+
+                  //  Log.d("contacts", contacts.toString());
                     Map<String, String> params = new HashMap<>();
-                    for(int i = 0 ; i < contacts.length; i++){
-                        mobiles.append(contacts[i]);
-                        if(i < contacts.length - 1){
-                            mobiles.append(",");
-                        }
+                    for(ContrastDO item : contrastDOS){
+                        mobiles.add(item.getUser_mobile());
                     }
-                    params.put("mobiles", mobiles.toString());
+                    params.put("mobiles", new Gson().toJson(mobiles));
                     params.put("userid", Platform.getInstance().getUsrId());
                     new ChatApi().getContrast(params, new INetWorkCallback<ContrastResultDO>() {
                         @Override
                         public void success(ContrastResultDO contrastResultDO, Object... objects) {
                             showProcessDialog(false);
+                            List<ContrastDO> resultList = new ArrayList<>();
                             if(contrastResultDO != null && !DataUtils.isListEmpty(contrastResultDO.getList())){
-                                Toast.makeText(getActivity(), "已同步"+contrastResultDO.getList().size()+"人", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getActivity(), "已同步"+contrastResultDO.getList().size()+"人", Toast.LENGTH_SHORT).show();
+                                resultList.addAll(contrastResultDO.getList());
+                                for(ContrastDO item : contrastResultDO.getList()){
+                                    for(ContrastDO contrastDO : contrastDOS){
+                                        if(TextUtils.equals(item.getUser_mobile(), contrastDO.getUser_mobile()) && TextUtils.isEmpty(item.getUser_name())){
+                                          //  resultList.add(contrastDO);
+                                            item.setUser_name(contrastDO.getUser_name());
+                                        }
+                                    }
+                                }
+                            }else {
+                                resultList.addAll(contrastDOS);
                             }
+                            Intent intent = new Intent(getActivity(), PhoneBookActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putByteArray("list", SerializeToFlatByte.serializeToByte(resultList));
+                            intent.putExtras(bundle);
+                            startActivity(intent);
                         }
 
                         @Override
@@ -246,7 +277,7 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
         }
     }
 
-    private String[] getContacts() {
+    private List<ContrastDO> getContacts() {
         //联系人的Uri，也就是content://com.android.contacts/contacts
         Uri uri = ContactsContract.Contacts.CONTENT_URI;
         //指定获取_id和display_name两列数据，display_name即为姓名
@@ -257,9 +288,10 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
         //根据Uri查询相应的ContentProvider，cursor为获取到的数据集
         Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
         if(cursor == null){
-            return new String[]{};
+            return new ArrayList<>();
         }
-        String[] arr = new String[cursor.getCount()];
+        //String[] arr = new String[cursor.getCount()];
+        List<ContrastDO> contrastDOS = new ArrayList<>();
         int i = 0;
         if (cursor.moveToFirst()) {
             do {
@@ -284,13 +316,18 @@ public class ChatFragment extends BaseFragment implements View.OnClickListener{
                 if (phonesCusor != null && phonesCusor.moveToFirst()) {
                     do {
                         String num = phonesCusor.getString(0);
-                        arr[i] = num;
+                        num = num.replaceAll("-", "");
+                     //   arr[i] = num;
+                        ContrastDO contrastDO = new ContrastDO();
+                        contrastDO.setUser_name(name);
+                        contrastDO.setUser_mobile(num);
+                        contrastDOS.add(contrastDO);
                     }while (phonesCusor.moveToNext());
                 }
                 i++;
             } while (cursor.moveToNext());
         }
-        return arr;
+        return contrastDOS;
     }
 
 }

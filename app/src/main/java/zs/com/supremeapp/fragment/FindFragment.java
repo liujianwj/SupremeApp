@@ -22,7 +22,8 @@ import zs.com.supremeapp.widget.webview.BridgeWebView;
 
 public class FindFragment extends BaseFragment {
 
-    private final String url = "http://app.cw2009.com/finder.html";
+  //  private final String url = "http://app.cw2009.com/finder.html";
+    private final String url = "file:///android_asset/jstest.html";
 
     @BindView(R.id.webView)
     BridgeWebView webView;

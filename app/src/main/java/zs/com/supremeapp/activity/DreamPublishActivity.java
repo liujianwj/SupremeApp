@@ -187,7 +187,7 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
             public void success(UploadVideoResultDO uploadVideoResultDO, Object... objects) {
                 showProcessDialog(false);
                 if(uploadVideoResultDO != null){
-                    videoPath = uploadVideoResultDO.getUri();
+                    videoPath = uploadVideoResultDO.getSource_url();
                 }
             }
 
@@ -245,6 +245,11 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
         }
         if(TextUtils.isEmpty(moneyEt.getText().toString())){
             Toast.makeText(this, getString(R.string.dream_money_input_tip), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(DataUtils.isListEmpty(uploadImageDOS) && TextUtils.isEmpty(videoPath)){
+            Toast.makeText(this, getString(R.string.dream_pic_input_tip), Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

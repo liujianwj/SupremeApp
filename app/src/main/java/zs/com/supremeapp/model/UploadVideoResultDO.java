@@ -6,13 +6,13 @@ package zs.com.supremeapp.model;
 
 public class UploadVideoResultDO extends BaseDO{
 
-    private String uri;
+    private String source_url;
 
-    public String getUri() {
-        return uri;
+    public String getSource_url() {
+        return source_url;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setSource_url(String source_url) {
+        this.source_url = source_url;
     }
 }

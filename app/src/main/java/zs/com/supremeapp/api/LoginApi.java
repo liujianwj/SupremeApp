@@ -1,6 +1,5 @@
 package zs.com.supremeapp.api;
 
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -69,6 +68,34 @@ public class LoginApi {
         });
     }
 
+    public void loginPwd(Map<String, String> params, final INetWorkCallback<LoginResultDO> callback){
+        loginApi.loginPwd(params).enqueue(new Callback<LoginResultDO>() {
+            @Override
+            public void onResponse(Call<LoginResultDO> call, Response<LoginResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<LoginResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void getVoiceCode(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+        loginApi.getVoiceCode(params).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
     public interface ILoginApi{
 
         @FormUrlEncoded
@@ -82,5 +109,13 @@ public class LoginApi {
         @FormUrlEncoded
         @POST("getuser.api")
         Call<UserResultDO> getuser(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("login_pwd.api")
+        Call<LoginResultDO> loginPwd(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("getcode/voice.api")
+        Call<ResponseBody> getVoiceCode(@FieldMap Map<String, String> params);
     }
 }

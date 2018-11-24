@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/spacing_10"
+    android:paddingRight="@dimen/spacing_10">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/spacing_10"
+        android:paddingTop="@dimen/spacing_10">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/headImg"
+            android:layout_width="@dimen/spacing_60"
+            android:layout_height="@dimen/spacing_60"
+            fresco:placeholderImage="@drawable/default_avatar"
+            fresco:roundAsCircle="true" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_8"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/nameTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                tools:text="我不是要生"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/companyTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_10"
+                android:singleLine="true"
+                tools:text="期待钱我道歉我的期望当前温度为球队前往地球为当前温度当前温度却无法千万富翁 v 我"
+                android:textColor="@color/grey_7d"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/timeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_10"
+            android:singleLine="true"
+            tools:text="7月12日"
+            android:textColor="@color/grey_7d"
+            android:textSize="14sp" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

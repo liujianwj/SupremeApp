@@ -55,10 +55,20 @@ public class DreamRecycleAdapter extends RecyclerView.Adapter<DreamRecycleAdapte
         holder.timeTv.setText(DateUtils.toDate(item.getDream_endday(), DateUtils.DATE_FORMAT0));
         holder.zanTv.setText(context.getResources().getString(R.string.zan_num, item.getDream_zhan()));
         holder.zanTargetTv.setText(context.getResources().getString(R.string.zan_target_num, item.getDream_target_zhan()));
-        if(!TextUtils.isEmpty(item.getDream_status())){
-            holder.completedView.setProgress(Integer.valueOf(item.getDream_status()));
-            holder.processTv.setText(Integer.valueOf(item.getDream_status())/100 + "%");
+        int process = 0;
+        try{
+            int zanNum = Integer.valueOf(item.getDream_zhan());
+            int zanTargetNum = Integer.valueOf(item.getDream_target_zhan());
+            if(zanTargetNum != 0){
+                process = zanNum * 100 /zanTargetNum;
+                process = process > 100 ? 100 : process;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
+        holder.completedView.setProgress(process);
+        holder.processTv.setText(process + "%");
         holder.itemLayout.setTag(position);
         holder.itemLayout.setOnClickListener(onClickListener);
     }

@@ -2,10 +2,12 @@ package zs.com.supremeapp.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -49,23 +51,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     TextView loginTv;
     @BindView(R.id.secondTv)
     TextView secondTv;
-    //    @BindView(R.id.loginTypeTv)
-//    TextView loginTypeTv;
+    @BindView(R.id.loginTypeTv)
+    TextView loginTypeTv;
     @BindView(R.id.passwordEt)
     EditText passwordEt;
     @BindView(R.id.passwordIv)
     ImageView passwordIv;
     @BindView(R.id.phoneNumberEt)
     EditText phoneNumberEt;
-//    @BindView(R.id.passwordEyeIv)
-//    ImageView passwordEyeIv;
+    @BindView(R.id.passwordEyeIv)
+    ImageView passwordEyeIv;
+    @BindView(R.id.voiceCodeTv)
+    TextView voiceCodeTv;
+    @BindView(R.id.voiceCodeLayout)
+    View voiceCodeLayout;
 
     private Handler secondHandler = new Handler();
     private SecondRunnable secondRunnable;
     private int secondNum = 60;
     private final static long SECOND_TIME = 1000;
-    // private int loginType = 1;   //1:短信   -1：密码
-    // private int passwordEyeType = 1; //1:不可见  -1：可见
+    private int loginType = 1;   //1:短信   -1：密码
+    private int passwordEyeType = 1; //1:不可见  -1：可见
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,8 +99,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         loginTv.setOnClickListener(this);
         secondTv.setOnClickListener(this);
-        //   loginTypeTv.setOnClickListener(this);
-        //   passwordEyeIv.setOnClickListener(this);
+        loginTypeTv.setOnClickListener(this);
+        passwordEyeIv.setOnClickListener(this);
+        voiceCodeTv.setOnClickListener(this);
     }
 
     private void getMessageCode() {
@@ -121,7 +128,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     //登录
-    private void login() {
+    private void loginByMessageCode() {
         Map<String, String> params = new HashMap<>();
         params.put("mobile", phoneNumberEt.getText().toString());
         params.put("code", passwordEt.getText().toString());
@@ -130,23 +137,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             @Override
             public void success(LoginResultDO loginResultDO, Object... objects) {
                 showProcessDialog(false);
-                try {
-                    Log.d("data", loginResultDO.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
-                Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
-                Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
-                Platform.getInstance().setAvatar(loginResultDO.getMember().getAvatar());
-                Platform.getInstance().setZone_pic(loginResultDO.getMember().getZone_pic());
-                SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
-                ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
-                ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());
-                ShareUtils.updateValue(sp, "im_token", loginResultDO.getMember().getIm_token());
-                imConnect();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                finish();
+                handlerLoginResult(loginResultDO);
             }
 
             @Override
@@ -155,6 +146,46 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void loginByPassword(){
+        Map<String, String> params = new HashMap<>();
+        params.put("mobile", phoneNumberEt.getText().toString());
+        params.put("password", passwordEt.getText().toString());
+        showProcessDialog(true);
+        new LoginApi().loginPwd(params, new INetWorkCallback<LoginResultDO>() {
+            @Override
+            public void success(LoginResultDO loginResultDO, Object... objects) {
+                showProcessDialog(false);
+                handlerLoginResult(loginResultDO);
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handlerLoginResult(LoginResultDO loginResultDO){
+        try {
+            Log.d("data", loginResultDO.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
+        Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
+        Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
+        Platform.getInstance().setAvatar(loginResultDO.getMember().getAvatar());
+        Platform.getInstance().setZone_pic(loginResultDO.getMember().getZone_pic());
+        SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
+        ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
+        ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());
+        ShareUtils.updateValue(sp, "im_token", loginResultDO.getMember().getIm_token());
+        imConnect();
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        finish();
     }
 
     private void imConnect(){
@@ -222,6 +253,29 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
     }
 
+    private void getVoiceCode(){
+        showProcessDialog(true);
+        Map<String, String> params = new HashMap<>();
+        params.put("mobile", phoneNumberEt.getText().toString());
+        new LoginApi().getVoiceCode(params, new INetWorkCallback<ResponseBody>() {
+            @Override
+            public void success(ResponseBody responseBody, Object... objects) {
+                showProcessDialog(false);
+                try {
+                    Log.d("data", responseBody.string());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onClick(View view) {
         if (R.id.loginTv == view.getId()) {
@@ -234,17 +288,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 return;
             }
             if (TextUtils.isEmpty(passwordEt.getText().toString())) {
-                Toast.makeText(this, getString(R.string.message_code_blank_tips), Toast.LENGTH_SHORT).show();
-//                if(loginType == 1){
-//                    Toast.makeText(this, getString(R.string.message_code_blank_tips), Toast.LENGTH_SHORT).show();
-//                }else {
-//                    Toast.makeText(this, getString(R.string.password_blank_tips), Toast.LENGTH_SHORT).show();
-//                }
+              //  Toast.makeText(this, getString(R.string.message_code_blank_tips), Toast.LENGTH_SHORT).show();
+                if(loginType == 1){
+                    Toast.makeText(this, getString(R.string.message_code_blank_tips), Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(this, getString(R.string.password_blank_tips), Toast.LENGTH_SHORT).show();
+                }
                 return;
             }
-            login();
-
+            if(loginType == 1){
+                loginByMessageCode();
+            }else {
+                loginByPassword();
+            }
         } else if (R.id.secondTv == view.getId()) { //发送读秒
+            if (TextUtils.isEmpty(phoneNumberEt.getText().toString())) {
+                Toast.makeText(this, getString(R.string.phone_blank_tips), Toast.LENGTH_SHORT).show();
+                return;
+            }
             secondNum = 60;
             if (secondRunnable == null) {
                 secondRunnable = new SecondRunnable(this);
@@ -252,31 +313,41 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             secondHandler.postDelayed(secondRunnable, SECOND_TIME);
             secondTv.setClickable(false);
             getMessageCode();
+        } else if(R.id.loginTypeTv == view.getId()){ //切换登陆方式
+            loginType = loginType * -1;
+            if(loginType == 1){ //短信登录
+                passwordEt.setHint(R.string.message_auth_code);
+                passwordIv.setImageResource(R.drawable.smscode_gray);
+                loginTypeTv.setText(R.string.mobile_password_login);
+                voiceCodeLayout.setVisibility(View.VISIBLE);
+                secondTv.setVisibility(View.VISIBLE);
+                passwordEyeIv.setVisibility(View.GONE);
+                secondTv.setClickable(true);
+            }else { //密码登录
+                passwordEt.setHint(R.string.password);
+                passwordIv.setImageResource(R.drawable.password_gray);
+                loginTypeTv.setText(R.string.mobile_message_login);
+                voiceCodeLayout.setVisibility(View.GONE);
+                secondTv.setVisibility(View.GONE);
+                passwordEyeIv.setVisibility(View.VISIBLE);
+                if(secondRunnable != null){
+                    secondHandler.removeCallbacks(secondRunnable);
+                }
+            }
+        } else if(R.id.passwordEyeIv == view.getId()){
+            passwordEyeType = passwordEyeType * -1;
+            if(passwordEyeType == 1){ //密码不可见
+                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            }else {
+                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            }
+        } else if(R.id.voiceCodeTv == view.getId()){
+            if (TextUtils.isEmpty(phoneNumberEt.getText().toString())) {
+                Toast.makeText(this, getString(R.string.phone_blank_tips), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            getVoiceCode();
         }
-//        else if(R.id.loginTypeTv == view.getId()){ //切换登陆方式
-//            loginType = loginType * -1;
-//            if(loginType == 1){ //短信登录
-//                passwordEt.setHint(R.string.message_auth_code);
-//                passwordIv.setImageResource(R.drawable.smscode_gray);
-//                loginTypeTv.setText(R.string.mobile_password_login);
-//                secondTv.setClickable(true);
-//            }else { //密码登录
-//                passwordEt.setHint(R.string.password);
-//                passwordIv.setImageResource(R.drawable.password_gray);
-//                loginTypeTv.setText(R.string.mobile_message_login);
-//                if(secondRunnable != null){
-//                    secondHandler.removeCallbacks(secondRunnable);
-//                }
-//            }
-//        }
-//        else if(R.id.passwordEyeIv == view.getId()){
-//            passwordEyeType = passwordEyeType * -1;
-//            if(passwordEyeType == 1){ //密码不可见
-//                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-//            }else {
-//                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-//            }
-//        }
     }
 
     @Override

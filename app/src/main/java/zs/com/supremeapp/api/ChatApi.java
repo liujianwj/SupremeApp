@@ -9,6 +9,7 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import zs.com.supremeapp.model.ContrastResultDO;
+import zs.com.supremeapp.model.DynamicsResultDO;
 import zs.com.supremeapp.model.NearbyResultDO;
 import zs.com.supremeapp.network.HttpClient;
 import zs.com.supremeapp.network.INetWorkCallback;
@@ -53,6 +54,20 @@ public class ChatApi {
         });
     }
 
+    public void getDynamics(Map<String, String> params, final INetWorkCallback<DynamicsResultDO> callback){
+        chatApi.getDynamics(params).enqueue(new Callback<DynamicsResultDO>() {
+            @Override
+            public void onResponse(Call<DynamicsResultDO> call, Response<DynamicsResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<DynamicsResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
     public interface IChatApi{
 
         @FormUrlEncoded
@@ -62,6 +77,10 @@ public class ChatApi {
         @FormUrlEncoded
         @POST("user/nearby.api")
         Call<NearbyResultDO> getNearby(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("im/getdynamics.api")
+        Call<DynamicsResultDO> getDynamics(@FieldMap Map<String, String> params);
 
     }
 }

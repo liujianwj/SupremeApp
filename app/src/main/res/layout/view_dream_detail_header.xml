@@ -177,6 +177,7 @@
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/callIMIv"
             android:layout_width="@dimen/spacing_35"
             android:layout_height="@dimen/spacing_35"
             android:src="@drawable/call_im" />

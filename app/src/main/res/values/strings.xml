@@ -33,4 +33,5 @@
     <string name="dream_title_input_tip">请输入Dream标题</string>
     <string name="dream_content_input_tip">请输入Dream描述内容</string>
     <string name="dream_money_input_tip">请输入Dream的价值</string>
+    <string name="dream_pic_input_tip">请添加照片或视频内容</string>
 </resources>

@@ -6,9 +6,27 @@ package zs.com.supremeapp.model;
 
 public class ContrastDO extends BaseDO{
 
+    private String uid;
     private String user_name;
     private String user_mobile;
     private String user_used_app;
+    private String user_avatar;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getUser_avatar() {
+        return user_avatar;
+    }
+
+    public void setUser_avatar(String user_avatar) {
+        this.user_avatar = user_avatar;
+    }
 
     public String getUser_name() {
         return user_name;

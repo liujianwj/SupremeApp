@@ -15,6 +15,18 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled true
+
+        ndk {
+            //选择要添加的对应 cpu 类型的 .so 库。
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86'
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+        }
+
+        manifestPlaceholders = [
+                JPUSH_PKGNAME : applicationId,
+                JPUSH_APPKEY : "ee18f9c65aa6822aa46ac42d", //JPush 上注册的包名对应的 Appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
     }
 
     signingConfigs {
@@ -51,7 +63,9 @@ android {
         }
 
         release {
-            minifyEnabled false
+            zipAlignEnabled true     //Zipalign优化
+            //shrinkResources true    // 移除无用的resource文件
+            minifyEnabled false     //混淆
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -98,4 +112,11 @@ dependencies {
     implementation files('libs/umeng-share-wechat-simplify-6.9.3.jar')
     implementation files('libs/umeng-sharetool-6.9.3.jar')
     implementation files('libs/umeng-common-1.5.4.jar')
+
+//    compile 'cn.jiguang.sdk:jpush:3.1.6'
+//    compile 'cn.jiguang.sdk:jcore:1.2.5'
+
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+
+ //   implementation 'org.greenrobot:eventbus:3.1.1'
 }

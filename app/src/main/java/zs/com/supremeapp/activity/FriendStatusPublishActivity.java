@@ -63,6 +63,13 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         initActivity(R.layout.activity_friend_status_publish);
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        if (intent != null) {
+            selectList = (List<LocalMedia>) intent.getSerializableExtra("selectList");
+            if (selectList == null) {
+                selectList = new ArrayList<>();
+            }
+        }
         backLayout.setOnClickListener(this);
         publishTv.setOnClickListener(this);
 
@@ -170,7 +177,7 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
             public void success(UploadVideoResultDO uploadVideoResultDO, Object... objects) {
                 showProcessDialog(false);
                 if(uploadVideoResultDO != null){
-                    videoPath = uploadVideoResultDO.getUri();
+                    videoPath = uploadVideoResultDO.getSource_url();
                 }
             }
 
@@ -232,12 +239,22 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
         });
     }
 
+    private boolean checkData(){
+        if(DataUtils.isListEmpty(uploadImageDOS) && TextUtils.isEmpty(videoPath)){
+            Toast.makeText(this, getString(R.string.dream_pic_input_tip), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onClick(View view) {
         if (R.id.backLayout == view.getId()) {
             finish();
         }else if(R.id.publishTv == view.getId()){
-            createZone();
+            if(checkData()){
+                createZone();
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import io.rong.imkit.RongIM;
+import io.rong.imlib.model.Conversation;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.DreamDetailCommentAdapter;
@@ -89,6 +92,7 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
     private TextView userCompanyTv;
     private SimpleDraweeView imageView1;
     private SimpleDraweeView imageView2;
+    private ImageView callIMIv;
 
     private String dreamId;
     private EditText commentEt;
@@ -120,6 +124,7 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         userCompanyTv = headerView.findViewById(R.id.userCompanyTv);
         imageView1 = headerView.findViewById(R.id.imageView1);
         imageView2 = headerView.findViewById(R.id.imageView2);
+        callIMIv = headerView.findViewById(R.id.callIMIv);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         supportRecyclerView.setLayoutManager(linearLayoutManager);
@@ -136,6 +141,7 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         activeRuleTv.setOnClickListener(this);
         reportIv.setOnClickListener(this);
         shareImg.setOnClickListener(this);
+        callIMIv.setOnClickListener(this);
 
         commentDOList = new ArrayList<>();
         dreamDetailCommentAdapter = new DreamDetailCommentAdapter(this, commentDOList);
@@ -356,10 +362,20 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
                 imageView2.setVisibility(View.GONE);
             }
         }
-        if(!TextUtils.isEmpty(dreamDO.getDream_status())){
-            completedView.setProgress(Integer.valueOf(dreamDO.getDream_status()));
-            processTv.setText(Integer.valueOf(dreamDO.getDream_status())/100 + "%");
+        int process = 0;
+        try{
+            int zanNum = Integer.valueOf(dreamDO.getDream_zhan());
+            int zanTargetNum = Integer.valueOf(dreamDO.getDream_target_zhan());
+            if(zanTargetNum != 0){
+                process = zanNum * 100 /zanTargetNum;
+                process = process > 100 ? 100 : process;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
+        completedView.setProgress(process);
+        processTv.setText(process + "%");
     }
 
     @Override
@@ -367,7 +383,7 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
         if(R.id.backLayout == view.getId()){
             finish();
         }else if(R.id.needTooTv == view.getId()){
-            startActivity(new Intent(this, DreamPublishActivity.class));
+          //  startActivity(new Intent(this, DreamPublishActivity.class));
         }else if(R.id.zanLayout == view.getId()){
             haveZans();
         }else if(R.id.commentLayout == view.getId()){ //评论
@@ -407,6 +423,8 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
             if(dreamDO != null){
                 UMHelpUtils.shareWebToWX(this, "http://app.cw2009.com/app/download.html", dreamDO.getDream_title(), dreamDO.getDream_content());
             }
+        }else if(R.id.callIMIv == view.getId()){
+            RongIM.getInstance().startConversation(this, Conversation.ConversationType.PRIVATE, dreamDO.getUser_id(), dreamDO.getUser_name());
         }
     }
 
