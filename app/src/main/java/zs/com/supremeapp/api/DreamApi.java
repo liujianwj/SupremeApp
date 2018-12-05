@@ -2,7 +2,6 @@ package zs.com.supremeapp.api;
 
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -10,6 +9,7 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import zs.com.supremeapp.model.CategoryResultDO;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.DreamCommentResultDO;
 import zs.com.supremeapp.model.DreamsResultDO;
 import zs.com.supremeapp.model.GetOneZanResultDO;
@@ -93,31 +93,31 @@ public class DreamApi {
 
     }
 
-    public void sendComment(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void sendComment(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        dreamApi.sendComment(params).enqueue(new Callback<ResponseBody>() {
+        dreamApi.sendComment(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
     }
 
-    public void createDream(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void createDream(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        dreamApi.createDream(params).enqueue(new Callback<ResponseBody>() {
+        dreamApi.createDream(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -138,16 +138,16 @@ public class DreamApi {
         });
     }
 
-    public void giveToZan(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void giveToZan(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        dreamApi.giveToZan(params).enqueue(new Callback<ResponseBody>() {
+        dreamApi.giveToZan(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -168,16 +168,16 @@ public class DreamApi {
         });
     }
 
-    public void getFreeZan(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void getFreeZan(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        dreamApi.getFreeZan(params).enqueue(new Callback<ResponseBody>() {
+        dreamApi.getFreeZan(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -234,12 +234,12 @@ public class DreamApi {
 
         @FormUrlEncoded
         @POST("dreams/giveto/comment.api")
-        Call<ResponseBody> sendComment(@FieldMap Map<String, String> params);
+        Call<DataDO> sendComment(@FieldMap Map<String, String> params);
 
         //发布Dream
         @FormUrlEncoded
         @POST("dreams/creat.api")
-        Call<ResponseBody> createDream(@FieldMap Map<String, String> params);
+        Call<DataDO> createDream(@FieldMap Map<String, String> params);
 
         //获取dream评论
         @FormUrlEncoded
@@ -249,7 +249,7 @@ public class DreamApi {
         //dream点赞
         @FormUrlEncoded
         @POST("dreams/giveto/zhan.api")
-        Call<ResponseBody> giveToZan(@FieldMap Map<String, String> params);
+        Call<DataDO> giveToZan(@FieldMap Map<String, String> params);
 
         //获取领取点赞数弹框状态
         @FormUrlEncoded
@@ -258,7 +258,7 @@ public class DreamApi {
 
         @FormUrlEncoded
         @POST("user/getfreezhan.api")
-        Call<ResponseBody> getFreeZan(@FieldMap Map<String, String> params);
+        Call<DataDO> getFreeZan(@FieldMap Map<String, String> params);
 
         @FormUrlEncoded
         @POST("getuser/havezhans.api")

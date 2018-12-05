@@ -1,4 +1,4 @@
-package zs.com.supremeapp.widget;
+package zs.com.supremeapp.adapter;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -15,20 +15,16 @@ import java.util.List;
 
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.model.BannerDO;
+import zs.com.supremeapp.widget.BannerViewPagerAdapter;
 
-
-/**
- * Created by liujian on 2018/09/23.
- */
-
-public class BannerViewPagerAdapter extends PagerAdapter {
+public class ImageCheckAdapter extends PagerAdapter {
     private Context context;
     private List<BannerDO> imagePaths;
     private int viewHeight;
     private List<SimpleDraweeView> views = new ArrayList<>();
-    private OnPagerItemClickListener onPagerItemClickListener;
+    private BannerViewPagerAdapter.OnPagerItemClickListener onPagerItemClickListener;
 
-    public BannerViewPagerAdapter(Context context, List<BannerDO> imagePaths) {
+    public ImageCheckAdapter(Context context, List<BannerDO> imagePaths) {
         this.context = context;
         this.imagePaths = imagePaths;
         initViews();
@@ -36,9 +32,6 @@ public class BannerViewPagerAdapter extends PagerAdapter {
 
     private void initViews(){
         int length = imagePaths.size();
-        if(imagePaths.size() > 1){
-            length += 2;
-        }
         for (int i = 0; i < length; i++) {
             SimpleDraweeView imageView = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.view_purchase_banner_viewpager, null);
             imageView.getHierarchy().setActualImageScaleType(ScalingUtils.ScaleType.FIT_XY);
@@ -47,7 +40,7 @@ public class BannerViewPagerAdapter extends PagerAdapter {
 
     }
 
-    public void setOnPagerItemClickListener(OnPagerItemClickListener onPagerItemClickListener) {
+    public void setOnPagerItemClickListener(BannerViewPagerAdapter.OnPagerItemClickListener onPagerItemClickListener) {
         this.onPagerItemClickListener = onPagerItemClickListener;
     }
 
@@ -67,16 +60,10 @@ public class BannerViewPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        int pathPos = position - 1;
-        if (position == 0) {
-            pathPos = imagePaths.size() - 1;
-        } else if (position == (views.size() - 1)) {
-            pathPos = 0;
-        }
         SimpleDraweeView imageView = views.get(position);
-        imageView.setImageURI(imagePaths.get(pathPos).getPhotoUrl());
+        imageView.setImageURI(imagePaths.get(position).getPhotoUrl());
         container.addView(imageView);
-        imageView.setTag(pathPos);
+        imageView.setTag(position);
         if(onPagerItemClickListener != null){
             views.get(position).setOnClickListener(new View.OnClickListener() {
                 @Override

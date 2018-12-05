@@ -4,7 +4,7 @@ package zs.com.supremeapp.model;
  * Created by liujian on 2018/9/26.
  */
 
-public class UploadImageDO {
+public class UploadImageDO extends BaseDO{
     private String source_url;
     private int source_width;
     private int source_height;

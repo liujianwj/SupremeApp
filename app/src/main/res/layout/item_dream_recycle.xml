@@ -13,11 +13,16 @@
     android:paddingTop="@dimen/spacing_10">
 
     <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/headImg"
+        android:id="@+id/dreamImg"
         android:layout_width="@dimen/spacing_70"
         android:layout_height="@dimen/spacing_70"
-        fresco:placeholderImage="@drawable/default_avatar"
-        fresco:roundAsCircle="true" />
+        fresco:roundAsCircle="true"
+        fresco:placeholderImage="@drawable/default_avatar" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/headImg"
+        android:layout_width="@dimen/spacing_70"
+        android:layout_height="@dimen/spacing_70"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -72,6 +77,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/userLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_10"
@@ -98,7 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="·实名认识服务者"
+                android:text="·实名创业者"
                 android:textColor="@color/grey_7d"
                 android:layout_marginLeft="@dimen/spacing_5"
                 android:textSize="14sp" />

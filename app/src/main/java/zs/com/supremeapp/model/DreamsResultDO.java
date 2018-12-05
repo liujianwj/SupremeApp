@@ -10,6 +10,16 @@ public class DreamsResultDO extends BaseDO{
 
     private List<DreamDO> list;
 
+    private PsDO ps;
+
+    public PsDO getPs() {
+        return ps;
+    }
+
+    public void setPs(PsDO ps) {
+        this.ps = ps;
+    }
+
     public List<DreamDO> getList() {
         return list;
     }

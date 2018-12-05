@@ -55,7 +55,7 @@ public class FriendStatusImageGridAdapter extends BaseAdapter{
             holder = (ViewHolder) view.getTag();
         }
         AlbumDO item = albumDOS.get(position);
-        holder.imageView.setImageURI(item.getSource_uri());
+        holder.imageView.setImageURI(item.getSource_url());
         return view;
     }
 

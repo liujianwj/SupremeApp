@@ -11,7 +11,8 @@ public class NearbyDO extends BaseDO{
     private String user_zone_url;
     private String user_mobile;
     private String user_avatar;
-    private GpsDO gps;
+    private String longitude;
+    private String latitude;
 
     public String getUser_id() {
         return user_id;
@@ -53,11 +54,19 @@ public class NearbyDO extends BaseDO{
         this.user_avatar = user_avatar;
     }
 
-    public GpsDO getGps() {
-        return gps;
+    public String getLongitude() {
+        return longitude;
     }
 
-    public void setGps(GpsDO gps) {
-        this.gps = gps;
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 }

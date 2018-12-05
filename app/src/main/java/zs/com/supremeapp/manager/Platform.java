@@ -21,10 +21,38 @@ public class Platform {
     }
 
     private String usrId;
+    private String name;
     private String mobile;
     private String imToken;
     private String avatar;
     private String zone_pic;
+
+    private String uid;
+    private String umobile;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getUmobile() {
+        return umobile;
+    }
+
+    public void setUmobile(String umobile) {
+        this.umobile = umobile;
+    }
 
     public String getAvatar() {
         return avatar;

@@ -132,6 +132,7 @@
             android:layout_height="@dimen/spacing_50" />
 
         <LinearLayout
+            android:id="@+id/userLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/spacing_5"
@@ -158,7 +159,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/spacing_5"
                     android:singleLine="true"
-                    android:text="·实名认识服务者"
+                    android:text="·实名创业者"
                     android:textColor="@color/grey_7d"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -205,37 +206,85 @@
         android:textColor="@color/grey_7d"
         android:textSize="14sp" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_marginTop="10dp"
+        android:layout_height="80dp">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/videoIv"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/spacing_80"
-            android:layout_marginTop="@dimen/spacing_10"
-            fresco:placeholderImage="@drawable/default_avatar"
-            android:layout_weight="1" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycle_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/imageView1"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/spacing_80"
-            android:layout_marginLeft="@dimen/spacing_10"
-            android:layout_marginTop="@dimen/spacing_10"
-            fresco:placeholderImage="@drawable/default_avatar"
-            android:layout_weight="1" />
+        <RelativeLayout
+            android:id="@+id/videoLayout"
+            android:layout_width="100dp"
+            android:layout_height="@dimen/spacing_80">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/imageView2"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/spacing_80"
-            android:layout_marginLeft="@dimen/spacing_10"
-            android:layout_marginTop="@dimen/spacing_10"
-            fresco:placeholderImage="@drawable/default_avatar"
-            android:layout_weight="1" />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/videoIv"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/spacing_80"
+                fresco:placeholderImage="@drawable/default_avatar"/>
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/playImage"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/video_play" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="@dimen/spacing_80"-->
+            <!--android:layout_marginTop="@dimen/spacing_10"-->
+            <!--android:layout_weight="1">-->
+
+            <!--<com.facebook.drawee.view.SimpleDraweeView-->
+                <!--android:id="@+id/videoIv"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="@dimen/spacing_80"-->
+                <!--fresco:placeholderImage="@drawable/default_avatar"-->
+                <!--android:visibility="invisible" />-->
+
+            <!--<ImageView-->
+                <!--android:id="@+id/playImage"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="30dp"-->
+                <!--android:layout_centerInParent="true"-->
+                <!--android:src="@drawable/video_play" />-->
+        <!--</RelativeLayout>-->
+
+
+        <!--<com.facebook.drawee.view.SimpleDraweeView-->
+            <!--android:id="@+id/imageView1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="@dimen/spacing_80"-->
+            <!--android:layout_marginLeft="@dimen/spacing_10"-->
+            <!--android:layout_marginTop="@dimen/spacing_10"-->
+            <!--fresco:placeholderImage="@drawable/default_avatar"-->
+            <!--android:visibility="invisible"-->
+            <!--android:layout_weight="1" />-->
+
+        <!--<com.facebook.drawee.view.SimpleDraweeView-->
+            <!--android:id="@+id/imageView2"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="@dimen/spacing_80"-->
+            <!--android:layout_marginLeft="@dimen/spacing_10"-->
+            <!--android:layout_marginTop="@dimen/spacing_10"-->
+            <!--android:visibility="invisible"-->
+            <!--fresco:placeholderImage="@drawable/default_avatar"-->
+            <!--android:layout_weight="1" />-->
+
+    <!--</LinearLayout>-->
 
     <View
         android:layout_width="match_parent"

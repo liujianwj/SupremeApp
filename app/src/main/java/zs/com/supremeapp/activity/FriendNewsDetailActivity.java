@@ -1,12 +1,15 @@
 package zs.com.supremeapp.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -16,16 +19,20 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.FriendCommentTextListAdapter;
 import zs.com.supremeapp.adapter.FriendStatusImageGridAdapter;
+import zs.com.supremeapp.adapter.FriendStatusListAdapter;
 import zs.com.supremeapp.api.ZoneApi;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.AlbumDO;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.ZoneDO;
 import zs.com.supremeapp.model.ZoneDetailResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
@@ -67,10 +74,14 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
     SimpleDraweeView singleImg;
     @BindView(R.id.imageGridView)
     GridView imageGridView;
+    @BindView(R.id.backLayout)
+    View backLayout;
 
 
     private FriendCommentPopup friendCommentPopup;
     private String zoneId;
+    private ZoneDO zoneDO;
+    private boolean isChange;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,6 +94,7 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             getZoneDetail();
         }
         sendTv.setOnClickListener(this);
+        backLayout.setOnClickListener(this);
     }
 
     private void getZoneDetail(){
@@ -93,7 +105,10 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             @Override
             public void success(ZoneDetailResultDO zoneDetailResultDO, Object... objects) {
                 showProcessDialog(false);
-                initZoneDetail(zoneDetailResultDO.getGetone());
+                if(zoneDetailResultDO != null && zoneDetailResultDO.getGetone() != null){
+                    zoneDO = zoneDetailResultDO.getGetone();
+                    initZoneDetail(zoneDO);
+                }
             }
 
             @Override
@@ -106,10 +121,11 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
 
     private void initZoneDetail(ZoneDO item){
         headImg.setImageURI(item.getUser_avatar());
+        headImg.setOnClickListener(this);
         nameTv.setText(item.getUser_name());
         if(!TextUtils.isEmpty(item.getContent())){
             contentTv.setVisibility(View.VISIBLE);
-            contentTv.setText(item.getContent());
+            contentTv.setText(Html.fromHtml(item.getContent()));
         }else {
             contentTv.setVisibility(View.GONE);
         }
@@ -117,12 +133,14 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             singleImg.setVisibility(View.VISIBLE);
             imageGridView.setVisibility(View.GONE);
             singleImg.setImageURI(item.getVideo());
+            singleImg.setOnClickListener(this);
         }else {
             if(!DataUtils.isListEmpty(item.getAlbum())) {
                 singleImg.setVisibility(View.GONE);
                 imageGridView.setVisibility(View.VISIBLE);
                 FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(this, item.getAlbum());
                 imageGridView.setAdapter(friendStatusImageGridAdapter);
+                imageGridView.setOnItemClickListener(new MyOnItemClickListener(item.getAlbum()));
             }else {
                 singleImg.setVisibility(View.GONE);
                 imageGridView.setVisibility(View.GONE);
@@ -167,11 +185,12 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
         params.put("zoneid", zoneId);
         params.put("comment", comment);
         showProcessDialog(true);
-        new ZoneApi().postComment(params, new INetWorkCallback<ResponseBody>() {
+        new ZoneApi().postComment(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
                 getZoneDetail();
+                isChange = true;
             }
 
             @Override
@@ -187,11 +206,12 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
         params.put("userid", Platform.getInstance().getUsrId());
         params.put("zoneid", zoneId);
         showProcessDialog(true);
-        new ZoneApi().giveToZhan(params, new INetWorkCallback<ResponseBody>() {
+        new ZoneApi().giveToZhan(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
                 getZoneDetail();
+                isChange = true;
             }
 
             @Override
@@ -224,6 +244,47 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             if(!TextUtils.isEmpty(commentEt.getText().toString())){
                 postComment(commentEt.getText().toString());
             }
+        }else if(viewId == R.id.backLayout){
+            finish();
+        } else if(viewId == R.id.singleImg){
+            if(zoneDO != null){
+                Intent intent = new Intent(this, VideoViewActivity.class);
+                intent.putExtra("videoUrl", zoneDO.getVideo());
+                this.startActivity(intent);
+            }
+        } else if(viewId == R.id.headImg){
+            if(zoneDO != null){
+                String url = "http://app.cw2009.com/s/" + zoneDO.getUser_id() + ".html";
+                Intent intent = new Intent(this, WebActivity.class);
+                intent.putExtra("url", url);
+                startActivity(intent);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(isChange){
+            setResult(RESULT_OK);
+        }
+        super.onBackPressed();
+    }
+
+    private class MyOnItemClickListener implements AdapterView.OnItemClickListener{
+        private ArrayList<String> pics = new ArrayList<>();
+
+        public MyOnItemClickListener(List<AlbumDO> albumDOS) {
+            for(AlbumDO item : albumDOS){
+                pics.add(item.getSource_url());
+            }
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Intent intent = new Intent(FriendNewsDetailActivity.this, ImageCheckActivity.class);
+            intent.putStringArrayListExtra("pics", pics);
+            intent.putExtra("position", i);
+            FriendNewsDetailActivity.this.startActivity(intent);
         }
     }
 }

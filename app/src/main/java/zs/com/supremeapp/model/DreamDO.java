@@ -1,5 +1,6 @@
 package zs.com.supremeapp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,17 +23,26 @@ public class DreamDO extends BaseDO{
     private String dream_endday;
     private String dream_creattime;
     private String dream_video;
-    private String dream_thumb;
+    private String dream_pic;
     private String dream_status;
     private String dream_video_thumb;
-    private List<String> ablum;
+    private ArrayList<String> dream_pics;
+    private String dream_money;
 
-    public List<String> getAblum() {
-        return ablum;
+    public String getDream_money() {
+        return dream_money;
     }
 
-    public void setAblum(List<String> ablum) {
-        this.ablum = ablum;
+    public void setDream_money(String dream_money) {
+        this.dream_money = dream_money;
+    }
+
+    public ArrayList<String> getDream_pics() {
+        return dream_pics;
+    }
+
+    public void setDream_pics(ArrayList<String> dream_pics) {
+        this.dream_pics = dream_pics;
     }
 
     public String getDream_video_thumb() {
@@ -163,12 +173,12 @@ public class DreamDO extends BaseDO{
         this.dream_video = dream_video;
     }
 
-    public String getDream_thumb() {
-        return dream_thumb;
+    public String getDream_pic() {
+        return dream_pic;
     }
 
-    public void setDream_thumb(String dream_thumb) {
-        this.dream_thumb = dream_thumb;
+    public void setDream_pic(String dream_pic) {
+        this.dream_pic = dream_pic;
     }
 
     public String getDream_status() {

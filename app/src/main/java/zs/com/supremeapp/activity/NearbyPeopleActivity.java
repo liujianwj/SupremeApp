@@ -8,9 +8,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
@@ -30,10 +34,12 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.model.LatLngBounds;
 import com.facebook.common.executors.CallerThreadExecutor;
 import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.ImageRequest;
@@ -46,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import de.hdodenhof.circleimageview.CircleImageView;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.api.ChatApi;
 import zs.com.supremeapp.manager.Platform;
@@ -134,10 +141,11 @@ public class NearbyPeopleActivity extends BaseActivity implements View.OnClickLi
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-//                if (marker.getZIndex() == mMarker.getZIndex()) {//判断是哪个marker
-//                    //获取mMarker的信息
-//                    Toast.makeText(NearbyPeopleActivity.this, "hha", Toast.LENGTH_SHORT).show();
-//                }
+                NearbyDO nearbyDO = nearbyDOList.get(marker.getZIndex());
+                String url = "http://app.cw2009.com/s/" + nearbyDO.getUser_id() + ".html";
+                Intent intent = new Intent(NearbyPeopleActivity.this, WebActivity.class);
+                intent.putExtra("url", url);
+                startActivity(intent);
                 return false;
             }
         });
@@ -253,7 +261,9 @@ public class NearbyPeopleActivity extends BaseActivity implements View.OnClickLi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mLocationClient.stop();
+        if(mLocationClient != null){
+            mLocationClient.stop();
+        }
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
         mapView.onDestroy();
 
@@ -303,25 +313,53 @@ public class NearbyPeopleActivity extends BaseActivity implements View.OnClickLi
                 //给地图设置状态
                 mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-            /**
+            /*
              * 绘制Marker，地图上常见的类似气球形状的图层
              */
-            for(NearbyDO nearbyDO : nearbyDOList){
-                makeMarker(nearbyDO);
-            }
+            for(int i = 0; i<nearbyDOList.size();i++){
+                NearbyDO nearbyDO = nearbyDOList.get(i);
+                if(!TextUtils.isEmpty(nearbyDO.getLatitude()) && !TextUtils.isEmpty(nearbyDO.getLongitude())){
+                    try{
+                        makeMarker(Double.parseDouble(nearbyDO.getLatitude()), Double.parseDouble(nearbyDO.getLongitude()), nearbyDO.getUser_avatar(),i);
+                        builder.include(new LatLng(Double.parseDouble(nearbyDO.getLatitude()), Double.parseDouble(nearbyDO.getLongitude())));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
 
+                }
+            }
+            builder.include(new LatLng(location.getLatitude(), location.getLongitude()));
+            MapStatusUpdate u = MapStatusUpdateFactory.newLatLngBounds(builder.build());
+            mBaiduMap.setMapStatus(u);
         }
     }
 
-    private void makeMarker(NearbyDO nearbyDO){
-        final MarkerOptions markerOptions = new MarkerOptions();//参数设置类
-        LatLng latLng = new LatLng(nearbyDO.getGps().getLat(), nearbyDO.getGps().getLng());
-        markerOptions.position(latLng);//marker坐标位置
-//        BitmapDescriptor icon = BitmapDescriptorFactory
-//                .fromResource(R.drawable.delet_zhaopian_1x);
+    private Bitmap getViewBitmap(View addViewContent) {
 
-        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(nearbyDO.getUser_avatar())).setProgressiveRenderingEnabled(true).build();
+        addViewContent.setDrawingCacheEnabled(true);
+
+        addViewContent.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        addViewContent.layout(0, 0,
+                addViewContent.getMeasuredWidth(),
+                addViewContent.getMeasuredHeight());
+
+        addViewContent.buildDrawingCache();
+        Bitmap cacheBitmap = addViewContent.getDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(cacheBitmap);
+
+        return bitmap;
+    }
+
+    private void makeMarker(double latitude, double longitude, String url, final int index){
+        final MarkerOptions markerOptions = new MarkerOptions();//参数设置类
+        LatLng latLng = new LatLng(latitude, longitude);
+        markerOptions.position(latLng);//marker坐标位置
+
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url)).setProgressiveRenderingEnabled(true).build();
         DataSource<CloseableReference<CloseableImage>> dataSource = Fresco.getImagePipeline()
                 .fetchDecodedImage(imageRequest, this);
         dataSource.subscribe(new BaseBitmapDataSubscriber() {
@@ -329,7 +367,11 @@ public class NearbyPeopleActivity extends BaseActivity implements View.OnClickLi
             @Override
             public void onNewResultImpl(Bitmap bitmap) {
                 if (bitmap != null){
-                    BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                    View view = LayoutInflater.from(NearbyPeopleActivity.this).inflate(R.layout.view_map_marker, null);
+                    ((CircleImageView)view.findViewById(R.id.imageView)).setImageBitmap(bitmap);
+                    BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(getViewBitmap(view));
+//                    BitmapDescriptor icon = BitmapDescriptorFactory
+//                            .fromResource(R.drawable.delet_zhaopian_1x);
 
                     markerOptions.icon(icon);//marker图标，可以自定义
                     markerOptions.draggable(false);//是否可拖拽，默认不可拖拽
@@ -337,7 +379,7 @@ public class NearbyPeopleActivity extends BaseActivity implements View.OnClickLi
                     markerOptions.alpha(0.8f);//marker图标透明度，0~1.0，默认为1.0
                     markerOptions.animateType(MarkerOptions.MarkerAnimateType.drop);//marker出现的方式，从天上掉下
                     markerOptions.flat(false);//marker突变是否平贴地面
-                    markerOptions.zIndex(1);//index
+                    markerOptions.zIndex(index);//index
 
                     // Marker动画效果
                     // markerOptions.icons(bitmapList);//如果需要显示动画，可以设置多张图片轮番显示

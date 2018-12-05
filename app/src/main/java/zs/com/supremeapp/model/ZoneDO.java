@@ -21,6 +21,7 @@ public class ZoneDO extends BaseDO{
     private List<CommentDO> commentslist;
     private List<AlbumDO> album;
 
+
     public List<AlbumDO> getAlbum() {
         return album;
     }

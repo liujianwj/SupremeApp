@@ -3,16 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/spacing_40"
-    android:paddingRight="@dimen/spacing_40">
-
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
+        android:paddingLeft="@dimen/spacing_40"
+        android:paddingRight="@dimen/spacing_40"
         android:orientation="vertical">
 
         <ImageView
@@ -178,6 +177,16 @@
             android:textSize="13sp"
             android:textColor="@color/common_red"
             android:text="《至上APP用户协议》"
+            android:layout_marginBottom="@dimen/spacing_30" />
+
+        <TextView
+            android:id="@+id/protocolTv1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/common_red"
+            android:singleLine="true"
+            android:text="《至上服务者协议》"
             android:layout_marginBottom="@dimen/spacing_30" />
 
     </LinearLayout>

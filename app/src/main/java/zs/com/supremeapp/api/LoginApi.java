@@ -2,13 +2,13 @@ package zs.com.supremeapp.api;
 
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.LoginResultDO;
 import zs.com.supremeapp.model.UserResultDO;
 import zs.com.supremeapp.network.HttpClient;
@@ -26,15 +26,15 @@ public class LoginApi {
         this.loginApi = HttpClient.newInstance().buildRetrofit().create(ILoginApi.class);
     }
 
-    public void getMessageCode(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
-        loginApi.getMessageCode(params).enqueue(new Callback<ResponseBody>() {
+    public void getMessageCode(Map<String, String> params, final INetWorkCallback<DataDO> callback){
+        loginApi.getMessageCode(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -82,15 +82,15 @@ public class LoginApi {
         });
     }
 
-    public void getVoiceCode(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
-        loginApi.getVoiceCode(params).enqueue(new Callback<ResponseBody>() {
+    public void getVoiceCode(Map<String, String> params, final INetWorkCallback<DataDO> callback){
+        loginApi.getVoiceCode(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -100,7 +100,7 @@ public class LoginApi {
 
         @FormUrlEncoded
         @POST("getcode.api")
-        Call<ResponseBody> getMessageCode(@FieldMap Map<String, String> params);
+        Call<DataDO> getMessageCode(@FieldMap Map<String, String> params);
 
         @FormUrlEncoded
         @POST("login.api")
@@ -116,6 +116,6 @@ public class LoginApi {
 
         @FormUrlEncoded
         @POST("getcode/voice.api")
-        Call<ResponseBody> getVoiceCode(@FieldMap Map<String, String> params);
+        Call<DataDO> getVoiceCode(@FieldMap Map<String, String> params);
     }
 }

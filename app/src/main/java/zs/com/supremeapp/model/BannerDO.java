@@ -5,40 +5,40 @@ package zs.com.supremeapp.model;
  */
 
 public class BannerDO extends BaseDO{
-    private String dream_id;
-    private String dream_title;
-    private String dream_thumb;
-    private String dream_ad_pic;
+    private String ads_id;
+    private String title;
+    private String photoUrl;
+    private String url;
 
-    public String getDream_id() {
-        return dream_id;
+    public String getAds_id() {
+        return ads_id;
     }
 
-    public void setDream_id(String dream_id) {
-        this.dream_id = dream_id;
+    public void setAds_id(String ads_id) {
+        this.ads_id = ads_id;
     }
 
-    public String getDream_title() {
-        return dream_title;
+    public String getTitle() {
+        return title;
     }
 
-    public void setDream_title(String dream_title) {
-        this.dream_title = dream_title;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getDream_thumb() {
-        return dream_thumb;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setDream_thumb(String dream_thumb) {
-        this.dream_thumb = dream_thumb;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
-    public String getDream_ad_pic() {
-        return dream_ad_pic;
+    public String getUrl() {
+        return url;
     }
 
-    public void setDream_ad_pic(String dream_ad_pic) {
-        this.dream_ad_pic = dream_ad_pic;
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

@@ -8,7 +8,7 @@ public class AlbumDO extends BaseDO{
 
     private String thumbnail_320;
     private String thumbnail_640;
-    private String source_uri;
+    private String source_url;
 
     public String getThumbnail_320() {
         return thumbnail_320;
@@ -26,11 +26,11 @@ public class AlbumDO extends BaseDO{
         this.thumbnail_640 = thumbnail_640;
     }
 
-    public String getSource_uri() {
-        return source_uri;
+    public String getSource_url() {
+        return source_url;
     }
 
-    public void setSource_uri(String source_uri) {
-        this.source_uri = source_uri;
+    public void setSource_url(String source_url) {
+        this.source_url = source_url;
     }
 }

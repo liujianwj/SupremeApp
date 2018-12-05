@@ -5,6 +5,7 @@ import android.app.Activity;
 import com.umeng.socialize.ShareAction;
 import com.umeng.socialize.UMShareListener;
 import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
 import com.umeng.socialize.media.UMWeb;
 
 /**
@@ -13,10 +14,23 @@ import com.umeng.socialize.media.UMWeb;
 
 public class UMHelpUtils {
 
+    public static void shareWebToWX(Activity activity, String url, String title, String des, String pic){
+        UMImage umImage = new UMImage(activity, pic);
+        UMWeb web = new UMWeb(url);
+        web.setTitle(title);//标题
+        web.setThumb(umImage);  //缩略图
+        web.setDescription(des);//描述
+        new ShareAction(activity)
+                .withMedia(web)
+                .setDisplayList(SHARE_MEDIA.WEIXIN, SHARE_MEDIA.WEIXIN_CIRCLE)
+                .setCallback(shareListener)
+                .open();
+    }
+
     public static void shareWebToWX(Activity activity, String url, String title, String des){
         UMWeb web = new UMWeb(url);
         web.setTitle(title);//标题
-        //  web.setThumb(thumb);  //缩略图
+       // web.setThumb(umImage);  //缩略图
         web.setDescription(des);//描述
         new ShareAction(activity)
                 .withMedia(web)

@@ -14,7 +14,7 @@
 
         <LinearLayout
             android:id="@+id/backLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -29,7 +29,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="dream"
                 android:textColor="@color/white"
                 android:textSize="14sp" />
 
@@ -106,7 +105,8 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <EditText
+                <TextView
+                    android:id="@+id/endDayTv"
                     android:layout_width="120dp"
                     android:layout_height="@dimen/spacing_50"
                     android:background="@drawable/bg_grey_edit_cor_5"

@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -17,6 +19,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,10 +31,12 @@ import io.rong.imlib.model.UserInfo;
 import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.LoginResultDO;
 import zs.com.supremeapp.model.UserResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
 import zs.com.supremeapp.api.LoginApi;
+import zs.com.supremeapp.utils.MD5Utils;
 import zs.com.supremeapp.utils.ShareUtils;
 import zs.com.supremeapp.utils.ToolUtils;
 
@@ -65,6 +71,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     TextView voiceCodeTv;
     @BindView(R.id.voiceCodeLayout)
     View voiceCodeLayout;
+    @BindView(R.id.protocolTv)
+    TextView protocolTv;
+    @BindView(R.id.protocolTv1)
+    TextView protocolTv1;
+
 
     private Handler secondHandler = new Handler();
     private SecondRunnable secondRunnable;
@@ -80,18 +91,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
         String userId = ShareUtils.getValue(sp, "userId", "");
-//        RongIM.setConnectionStatusListener(new RongIMClient.ConnectionStatusListener() {
-//            @Override
-//            public void onChanged(ConnectionStatus status) {
-//                if (status == ConnectionStatus.TOKEN_INCORRECT) {
-//                    imConnect();
-//                }
-//            }
-//        });
         if(!TextUtils.isEmpty(userId)){
             Platform.getInstance().setUsrId(userId);
             Platform.getInstance().setMobile(ShareUtils.getValue(sp, "mobile", ""));
             Platform.getInstance().setImToken(ShareUtils.getValue(sp, "im_token", ""));
+            Platform.getInstance().setAvatar(ShareUtils.getValue(sp, "avatar", ""));
+            Platform.getInstance().setZone_pic(ShareUtils.getValue(sp, "zone_pic", ""));
+            Platform.getInstance().setUid(ShareUtils.getValue(sp, "uid", ""));
+            Platform.getInstance().setUmobile(ShareUtils.getValue(sp, "umobile", ""));
+            Platform.getInstance().setName(ShareUtils.getValue(sp, "name", ""));
             imConnect();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
@@ -102,21 +110,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         loginTypeTv.setOnClickListener(this);
         passwordEyeIv.setOnClickListener(this);
         voiceCodeTv.setOnClickListener(this);
+        protocolTv.setOnClickListener(this);
+        protocolTv1.setOnClickListener(this);
     }
 
     private void getMessageCode() {
         showProcessDialog(true);
         Map<String, String> params = new HashMap<>();
         params.put("mobile", phoneNumberEt.getText().toString());
-        new LoginApi().getMessageCode(params, new INetWorkCallback<ResponseBody>() {
+        new LoginApi().getMessageCode(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
-                try {
-                    Log.d("data", responseBody.string());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
 
             @Override
@@ -148,10 +153,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
     }
 
+
+
     private void loginByPassword(){
         Map<String, String> params = new HashMap<>();
         params.put("mobile", phoneNumberEt.getText().toString());
-        params.put("password", passwordEt.getText().toString());
+        params.put("password", MD5Utils.md5(passwordEt.getText().toString()));
         showProcessDialog(true);
         new LoginApi().loginPwd(params, new INetWorkCallback<LoginResultDO>() {
             @Override
@@ -169,20 +176,36 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void handlerLoginResult(LoginResultDO loginResultDO){
-        try {
-            Log.d("data", loginResultDO.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(loginResultDO != null){
+            SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
+            if(loginResultDO.getMember() != null){
+                Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
+                Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
+                Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
+                Platform.getInstance().setAvatar(loginResultDO.getMember().getAvatar());
+                Platform.getInstance().setZone_pic(loginResultDO.getMember().getZone_pic());
+                Platform.getInstance().setName(loginResultDO.getMember().getName());
+
+                ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
+                ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());
+                ShareUtils.updateValue(sp, "im_token", loginResultDO.getMember().getIm_token());
+                ShareUtils.updateValue(sp, "avatar", loginResultDO.getMember().getAvatar());
+                ShareUtils.updateValue(sp, "zone_pic", loginResultDO.getMember().getZone_pic());
+                ShareUtils.updateValue(sp, "name", loginResultDO.getMember().getName());
+            }
+
+            if(loginResultDO.getCustom() != null){
+                Platform.getInstance().setUid(loginResultDO.getCustom().getUid());
+                Platform.getInstance().setUmobile(loginResultDO.getCustom().getUmobile());
+
+                ShareUtils.updateValue(sp, "uid", loginResultDO.getCustom().getUid());
+                ShareUtils.updateValue(sp, "umobile", loginResultDO.getCustom().getUmobile());
+            }
         }
-        Platform.getInstance().setUsrId(loginResultDO.getMember().getId());
-        Platform.getInstance().setMobile(loginResultDO.getMember().getMobile());
-        Platform.getInstance().setImToken(loginResultDO.getMember().getIm_token());
-        Platform.getInstance().setAvatar(loginResultDO.getMember().getAvatar());
-        Platform.getInstance().setZone_pic(loginResultDO.getMember().getZone_pic());
-        SharedPreferences sp = ShareUtils.getSP(ShareUtils.SHARE_PARAMS, LoginActivity.this);
-        ShareUtils.updateValue(sp, "userId", loginResultDO.getMember().getId());
-        ShareUtils.updateValue(sp, "mobile", loginResultDO.getMember().getMobile());
-        ShareUtils.updateValue(sp, "im_token", loginResultDO.getMember().getIm_token());
+
+
+
+
         imConnect();
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
@@ -257,15 +280,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         showProcessDialog(true);
         Map<String, String> params = new HashMap<>();
         params.put("mobile", phoneNumberEt.getText().toString());
-        new LoginApi().getVoiceCode(params, new INetWorkCallback<ResponseBody>() {
+        new LoginApi().getVoiceCode(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
-                try {
-                    Log.d("data", responseBody.string());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
 
             @Override
@@ -317,19 +335,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             loginType = loginType * -1;
             if(loginType == 1){ //短信登录
                 passwordEt.setHint(R.string.message_auth_code);
+                passwordEt.setText("");
                 passwordIv.setImageResource(R.drawable.smscode_gray);
+                passwordEt.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                passwordEt.setSelection(passwordEt.getText().toString().length());
+
                 loginTypeTv.setText(R.string.mobile_password_login);
                 voiceCodeLayout.setVisibility(View.VISIBLE);
                 secondTv.setVisibility(View.VISIBLE);
                 passwordEyeIv.setVisibility(View.GONE);
                 secondTv.setClickable(true);
             }else { //密码登录
+                passwordEyeType = 1;
+                passwordEt.setText("");
+                passwordEt.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                passwordEt.setSelection(passwordEt.getText().toString().length());
+               // passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 passwordEt.setHint(R.string.password);
+
                 passwordIv.setImageResource(R.drawable.password_gray);
                 loginTypeTv.setText(R.string.mobile_message_login);
                 voiceCodeLayout.setVisibility(View.GONE);
                 secondTv.setVisibility(View.GONE);
                 passwordEyeIv.setVisibility(View.VISIBLE);
+                passwordEyeIv.setImageResource(R.drawable.eye_close);
                 if(secondRunnable != null){
                     secondHandler.removeCallbacks(secondRunnable);
                 }
@@ -337,9 +366,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         } else if(R.id.passwordEyeIv == view.getId()){
             passwordEyeType = passwordEyeType * -1;
             if(passwordEyeType == 1){ //密码不可见
-                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                //passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                passwordEt.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                passwordEt.setSelection(passwordEt.getText().toString().length());
+                passwordEyeIv.setImageResource(R.drawable.eye_close);
             }else {
-                passwordEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                passwordEt.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                passwordEt.setSelection(passwordEt.getText().toString().length());
+                passwordEyeIv.setImageResource(R.drawable.eye_white);
             }
         } else if(R.id.voiceCodeTv == view.getId()){
             if (TextUtils.isEmpty(phoneNumberEt.getText().toString())) {
@@ -347,6 +381,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 return;
             }
             getVoiceCode();
+        } else if(R.id.protocolTv == view.getId()){
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra("url", "http://app.cw2009.com/rule_custom.html");
+            startActivity(intent);
+        } else if(R.id.protocolTv1 == view.getId()){
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra("url", "http://app.cw2009.com/rule_member.html");
+            startActivity(intent);
         }
     }
 

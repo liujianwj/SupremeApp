@@ -1,12 +1,14 @@
 package zs.com.supremeapp.adapter;
 
 import android.content.Context;
-import android.net.Uri;
+import android.content.Intent;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -15,11 +17,15 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import zs.com.supremeapp.R;
+import zs.com.supremeapp.activity.DreamDetailActivity;
+import zs.com.supremeapp.activity.ImageCheckActivity;
+import zs.com.supremeapp.model.AlbumDO;
 import zs.com.supremeapp.model.ZoneDO;
 import zs.com.supremeapp.utils.DataUtils;
 import zs.com.supremeapp.utils.DateUtils;
@@ -75,10 +81,14 @@ public class FriendStatusListAdapter extends BaseAdapter {
         }
         ZoneDO item = zoneDOList.get(position);
         holder.headImg.setImageURI(item.getUser_avatar());
+        holder.headImg.setTag(position);
+        holder.headImg.setOnClickListener(onClickListener);
+        holder.contentLayout.setTag(position);
+        holder.contentLayout.setOnClickListener(onClickListener);
         holder.nameTv.setText(item.getUser_name());
         if(!TextUtils.isEmpty(item.getContent())){
             holder.contentTv.setVisibility(View.VISIBLE);
-            holder.contentTv.setText(item.getContent());
+            holder.contentTv.setText(Html.fromHtml(item.getContent()));
         }else {
             holder.contentTv.setVisibility(View.GONE);
         }
@@ -86,13 +96,16 @@ public class FriendStatusListAdapter extends BaseAdapter {
         if(!TextUtils.isEmpty(item.getVideo())){
             holder.singleImg.setVisibility(View.VISIBLE);
             holder.imageGridView.setVisibility(View.GONE);
-            holder.singleImg.setImageURI(item.getVideo());
+          //  holder.singleImg.setImageURI(item.getVideo());
+            holder.singleImg.setTag(item.getVideo());
+            holder.singleImg.setOnClickListener(onClickListener);
         }else {
             if(!DataUtils.isListEmpty(item.getAlbum())) {
                 holder.singleImg.setVisibility(View.GONE);
                 holder.imageGridView.setVisibility(View.VISIBLE);
                 FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(context, item.getAlbum());
                 holder.imageGridView.setAdapter(friendStatusImageGridAdapter);
+                holder.imageGridView.setOnItemClickListener(new MyOnItemClickListener(item.getAlbum()));
             }else {
                 holder.singleImg.setVisibility(View.GONE);
                 holder.imageGridView.setVisibility(View.GONE);
@@ -135,6 +148,24 @@ public class FriendStatusListAdapter extends BaseAdapter {
         return view;
     }
 
+    private class MyOnItemClickListener implements AdapterView.OnItemClickListener{
+        private ArrayList<String> pics = new ArrayList<>();
+
+        public MyOnItemClickListener(List<AlbumDO> albumDOS) {
+            for(AlbumDO item : albumDOS){
+                pics.add(item.getSource_url());
+            }
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Intent intent = new Intent(context, ImageCheckActivity.class);
+            intent.putStringArrayListExtra("pics", pics);
+            intent.putExtra("position", i);
+            context.startActivity(intent);
+        }
+    }
+
     static class ViewHolder {
 
         @BindView(R.id.headImg)
@@ -159,6 +190,8 @@ public class FriendStatusListAdapter extends BaseAdapter {
         SimpleDraweeView singleImg;
         @BindView(R.id.imageGridView)
         GridView imageGridView;
+        @BindView(R.id.contentLayout)
+        View contentLayout;
 
         public ViewHolder(View itemView) {
             ButterKnife.bind(this, itemView);

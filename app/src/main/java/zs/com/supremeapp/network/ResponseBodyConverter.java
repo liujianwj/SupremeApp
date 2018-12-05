@@ -1,6 +1,7 @@
 package zs.com.supremeapp.network;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.TypeAdapter;
@@ -34,7 +35,13 @@ public class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         try {
             verify(json);
             JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
-            return adapter.read(gson.newJsonReader(new StringReader(jsonObject.get("data").getAsJsonObject().toString())));
+            JsonElement jsonElement = jsonObject.get("data");
+            if(jsonElement.isJsonArray()){
+                String a = "{'data':{}}";
+                return adapter.read(gson.newJsonReader(new StringReader(((JsonObject) new JsonParser().parse(a)).get("data").getAsJsonObject().toString())));
+            }else {
+                return adapter.read(gson.newJsonReader(new StringReader(jsonObject.get("data").getAsJsonObject().toString())));
+            }
         } finally {
             value.close();
         }

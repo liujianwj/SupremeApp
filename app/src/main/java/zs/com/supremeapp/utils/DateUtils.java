@@ -1,5 +1,7 @@
 package zs.com.supremeapp.utils;
 
+import android.text.TextUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,18 +19,30 @@ public class DateUtils {
     public final static SimpleDateFormat DATE_FORMAT0 = new SimpleDateFormat(
             "MM月dd日", Locale.getDefault());
 
-    public static String toDate(long millisecondDate, SimpleDateFormat format) {
-        String time = "";
-        try {
-            time = format.format(new Date(millisecondDate));
-        } catch (Exception e) {
+    public static long getStringToDate(String dateString, String pattern) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        Date date = new Date();
+        try{
+            date = dateFormat.parse(dateString);
+        } catch(ParseException e) {
             e.printStackTrace();
         }
-
-        return time;
+        return date.getTime();
     }
 
-    public static String toDate(String millisecondDate, SimpleDateFormat format) {
+    public static String toString(String format, Date date){
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.CHINA);
+        if (TextUtils.isEmpty(format)) {
+            return "";
+        }
+        if (date == null) {
+            date = new Date();
+        }
+
+        return dateFormat.format(date);
+    }
+
+    public static String toDate(long millisecondDate, SimpleDateFormat format) {
         String time = "";
         try {
             time = format.format(new Date(millisecondDate));

@@ -1,5 +1,7 @@
 package zs.com.supremeapp.activity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,11 +10,15 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.listener.OnTimeSelectListener;
+import com.bigkoo.pickerview.view.TimePickerView;
 import com.google.gson.Gson;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
@@ -21,6 +27,7 @@ import com.luck.picture.lib.entity.LocalMedia;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +40,14 @@ import zs.com.supremeapp.api.DreamApi;
 import zs.com.supremeapp.api.UploadApi;
 import zs.com.supremeapp.manager.FullyGridLayoutManager;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.DataDO;
+import zs.com.supremeapp.model.DreamDO;
 import zs.com.supremeapp.model.UploadImageDO;
 import zs.com.supremeapp.model.UploadImageResultDO;
 import zs.com.supremeapp.model.UploadVideoResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
 import zs.com.supremeapp.utils.DataUtils;
+import zs.com.supremeapp.utils.DateUtils;
 
 /**
  * dream发布
@@ -60,20 +70,45 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
     EditText contentEt;
     @BindView(R.id.activeRuleTv)
     TextView activeRuleTv;
+    @BindView(R.id.endDayTv)
+    TextView endDayTv;
 
     private GridImageAdapter adapter;
     private List<LocalMedia> selectList = new ArrayList<>();
     private List<UploadImageDO> uploadImageDOS = new ArrayList<>();
     private String videoPath;
+    private DreamDO dreamDO;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         initActivity(R.layout.activity_dream_publish);
         super.onCreate(savedInstanceState);
 
+        Intent intent = getIntent();
+        if(intent != null){
+            dreamDO = (DreamDO)intent.getSerializableExtra("dreamDO");
+            if(dreamDO != null){
+                dreamTitleEt.setText(dreamDO.getDream_title());
+                moneyEt.setText(dreamDO.getDream_money());
+                endDayTv.setText(dreamDO.getDream_endday());
+                contentEt.setText(dreamDO.getDream_content());
+                if(!DataUtils.isListEmpty(dreamDO.getDream_pics())){
+                    for(String item : dreamDO.getDream_pics()){
+                        LocalMedia localMedia = new LocalMedia();
+                        localMedia.setPath(item);
+                        selectList.add(localMedia);
+
+                        UploadImageDO uploadImageDO = new UploadImageDO();
+                        uploadImageDO.setSource_url(item);
+                        uploadImageDOS.add(uploadImageDO);
+                    }
+                }
+            }
+        }
         backLayout.setOnClickListener(this);
         publishTv.setOnClickListener(this);
         activeRuleTv.setOnClickListener(this);
+        endDayTv.setOnClickListener(this);
 
         FullyGridLayoutManager manager = new FullyGridLayoutManager(DreamPublishActivity.this, 4, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);
@@ -165,8 +200,10 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
                             videoPath = null;
                             List<File> files = new ArrayList<>(selectList.size());
                             for (LocalMedia media : selectList) {
-                                Log.i("图片-----》", media.getPath());
-                                files.add(new File(media.getPath()));
+                                if(media.getPath() != null && !media.getPath().contains("http:")){
+                                    Log.i("图片-----》", media.getPath());
+                                    files.add(new File(media.getPath()));
+                                }
                             }
                             uploadImages(files);
                         }
@@ -207,6 +244,13 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
                 showProcessDialog(false);
                 if(responseBody != null && !DataUtils.isListEmpty(responseBody.getF())){
                     uploadImageDOS = responseBody.getF();
+                    for(LocalMedia localMedia : selectList){
+                        if(!TextUtils.isEmpty(localMedia.getPath()) && localMedia.getPath().contains("http:")){
+                            UploadImageDO uploadImageDO = new UploadImageDO();
+                            uploadImageDO.setSource_url(localMedia.getPath());
+                            uploadImageDOS.add(uploadImageDO);
+                        }
+                    }
                 }
             }
 
@@ -231,6 +275,18 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
             Intent intent = new Intent(this, WebActivity.class);
             intent.putExtra("url", "http://app.cw2009.com/h5/deram/rule.html");
             this.startActivity(intent);
+        }else if(R.id.endDayTv == viewId){
+            hideSoftKeyboard(this);
+            //时间选择器
+            final TimePickerView pvTime = new TimePickerBuilder(this, new OnTimeSelectListener() {
+                @Override
+                public void onTimeSelect(Date date, View v) {
+                   // Toast.makeText(this, getTime(date), Toast.LENGTH_SHORT).show();
+                   // DateUtils.getTime(date);
+                    endDayTv.setText(DateUtils.toString("yyyy-MM-dd", date));
+                }
+            }).build();
+            pvTime.show();
         }
     }
 
@@ -252,6 +308,11 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
             Toast.makeText(this, getString(R.string.dream_pic_input_tip), Toast.LENGTH_SHORT).show();
             return false;
         }
+
+        if(TextUtils.isEmpty(endDayTv.getText().toString())){
+            Toast.makeText(this, getString(R.string.dream_time_input_tip), Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 
@@ -260,6 +321,8 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
         params.put("userid", Platform.getInstance().getUsrId());
         params.put("title", DataUtils.nullToEmpty(dreamTitleEt.getText().toString()));
         params.put("content", DataUtils.nullToEmpty(contentEt.getText().toString()));
+       // params.put("endday", DateUtils.getStringToDate(endDayTv.getText().toString(), "yyyy-MM-dd")+"");
+        params.put("endday", endDayTv.getText().toString());
         if(!DataUtils.isListEmpty(uploadImageDOS)){
             List<String> pics = new ArrayList<>();
             for(UploadImageDO uploadImageDO : uploadImageDOS){
@@ -272,9 +335,9 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
             params.put("video", videoPath);
         }
         showProcessDialog(true);
-        new DreamApi().createDream(params, new INetWorkCallback<ResponseBody>() {
+        new DreamApi().createDream(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
                 setResult(RESULT_OK);
                 finish();
@@ -286,5 +349,15 @@ public class DreamPublishActivity extends BaseActivity implements View.OnClickLi
                 Toast.makeText(DreamPublishActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * 隐藏软键盘
+     */
+    public static  void hideSoftKeyboard(Activity activity) {
+        InputMethodManager im = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (im.isActive() || activity.getCurrentFocus() != null) {
+            im.hideSoftInputFromWindow(activity.findViewById(android.R.id.content).getWindowToken(), 0);
+        }
     }
 }

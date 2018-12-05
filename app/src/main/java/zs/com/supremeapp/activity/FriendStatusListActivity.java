@@ -38,7 +38,10 @@ import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.FriendStatusListAdapter;
 import zs.com.supremeapp.api.ZoneApi;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.CommentDO;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.NewmsgsResultDO;
+import zs.com.supremeapp.model.ZanDO;
 import zs.com.supremeapp.model.ZoneDO;
 import zs.com.supremeapp.model.ZoneResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
@@ -66,6 +69,7 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
 
     private View newsLayout;
     private TextView newsNumTv;
+    private TextView myNameTv;
 
     private FriendStatusListAdapter friendStatusListAdapter;
     private FriendCommentPopup friendCommentPopup;
@@ -82,11 +86,14 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
 
         View headerView = LayoutInflater.from(this).inflate(R.layout.view_friend_status_list_header, listView, false);
         SimpleDraweeView bgImg = headerView.findViewById(R.id.bgImg);
-        SimpleDraweeView headImg = headerView.findViewById(R.id.headImg);
+        SimpleDraweeView myHeadImg = headerView.findViewById(R.id.myHeadImg);
         bgImg.setImageURI(Platform.getInstance().getZone_pic());
-        headImg.setImageURI(Platform.getInstance().getAvatar());
+        myHeadImg.setImageURI(Platform.getInstance().getAvatar());
+        myHeadImg.setOnClickListener(this);
         newsLayout = headerView.findViewById(R.id.newsLayout);
         newsNumTv = headerView.findViewById(R.id.newsNumTv);
+        myNameTv = headerView.findViewById(R.id.myNameTv);
+        myNameTv.setText(Platform.getInstance().getName());
         newsLayout.setOnClickListener(this);
         listView.addHeaderView(headerView);
 
@@ -183,15 +190,20 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
         });
     }
 
-    private void giveToZhan(int position){
+    private void giveToZhan(final int position){
         Map<String, String> params = new HashMap<>();
         params.put("userid", Platform.getInstance().getUsrId());
         params.put("zoneid", zoneDOList.get(position).getId());
         showProcessDialog(true);
-        zoneApi.giveToZhan(params, new INetWorkCallback<ResponseBody>() {
+        zoneApi.giveToZhan(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
+                ZanDO zanDO = new ZanDO();
+                zanDO.setUser_id(Platform.getInstance().getUsrId());
+                zanDO.setUser_name(Platform.getInstance().getName());
+                zoneDOList.get(position).getZhans().add(zanDO);
+                friendStatusListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -202,16 +214,22 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
         });
     }
 
-    private void postComment(int position, String comment){
+    private void postComment(final int position, final String comment){
         Map<String, String> params = new HashMap<>();
         params.put("userid", Platform.getInstance().getUsrId());
         params.put("zoneid", zoneDOList.get(position).getId());
         params.put("comment", comment);
         showProcessDialog(true);
-        zoneApi.postComment(params, new INetWorkCallback<ResponseBody>() {
+        zoneApi.postComment(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
+                CommentDO commentDO = new CommentDO();
+                commentDO.setUser_id(Platform.getInstance().getUsrId());
+                commentDO.setUser_name(Platform.getInstance().getName());
+                commentDO.setComment_content(comment);
+                zoneDOList.get(position).getCommentslist().add(commentDO);
+                friendStatusListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -288,6 +306,34 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
             finish();
         } else if(viewId == R.id.newsLayout){ // 查看消息列表
             haveRead();
+        } else if(viewId == R.id.singleImg){
+            Intent intent = new Intent(this, VideoViewActivity.class);
+            intent.putExtra("videoUrl", (String) view.getTag());
+            this.startActivity(intent);
+        } else if(viewId == R.id.headImg){
+            Object object = view.getTag();
+            if(object instanceof Integer){
+                int pos = (Integer) object;
+                ZoneDO zoneDO = zoneDOList.get(pos);
+                String url = "http://app.cw2009.com/s/" + zoneDO.getUser_id() + ".html";
+                Intent intent = new Intent(this, WebActivity.class);
+                intent.putExtra("url", url);
+                startActivity(intent);
+            }
+        } else if(viewId == R.id.contentLayout){
+            Object object = view.getTag();
+            if(object instanceof Integer){
+                int pos = (Integer) object;
+                ZoneDO zoneDO = zoneDOList.get(pos);
+                Intent intent = new Intent(this, FriendNewsDetailActivity.class);
+                intent.putExtra("zoneId", zoneDO.getId());
+                startActivityForResult(intent, CODE_REFRESH);
+            }
+        }else if(viewId == R.id.myHeadImg){
+            String url = "http://app.cw2009.com/s/" + Platform.getInstance().getUsrId() + ".html";
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
         }
     }
 
@@ -340,9 +386,9 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
     private void haveRead(){
         Map<String, String> params = new HashMap<>();
         showProcessDialog(true);
-        zoneApi.haveRead(params, new INetWorkCallback<ResponseBody>() {
+        zoneApi.haveRead(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("newmsgsResultDO", newmsgsResultDO);
@@ -385,7 +431,7 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
                     if(!DataUtils.isListEmpty(selectList)){
                         Intent intent = new Intent(this, FriendStatusPublishActivity.class);
                         intent.putExtra("selectList", (Serializable) selectList);
-                        startActivity(intent);
+                        startActivityForResult(intent, CODE_REFRESH);
                     }
                     break;
             }

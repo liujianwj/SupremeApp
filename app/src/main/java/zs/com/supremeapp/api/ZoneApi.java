@@ -2,13 +2,13 @@ package zs.com.supremeapp.api;
 
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.NewmsgsResultDO;
 import zs.com.supremeapp.model.ZoneDetailResultDO;
 import zs.com.supremeapp.model.ZoneResultDO;
@@ -56,45 +56,45 @@ public class ZoneApi {
         });
     }
 
-    public void giveToZhan(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void giveToZhan(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        zoneApi.giveToZhan(params).enqueue(new Callback<ResponseBody>() {
+        zoneApi.giveToZhan(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
     }
 
-    public void postComment(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
+    public void postComment(Map<String, String> params, final INetWorkCallback<DataDO> callback){
 
-        zoneApi.postComment(params).enqueue(new Callback<ResponseBody>() {
+        zoneApi.postComment(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
     }
 
-    public void createZone(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
-        zoneApi.createZone(params).enqueue(new Callback<ResponseBody>() {
+    public void createZone(Map<String, String> params, final INetWorkCallback<DataDO> callback){
+        zoneApi.createZone(params).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -114,15 +114,15 @@ public class ZoneApi {
         });
     }
 
-    public void haveRead(Map<String, String> params, final INetWorkCallback<ResponseBody> callback){
-       zoneApi.haveRead(params).enqueue(new Callback<ResponseBody>() {
+    public void haveRead(Map<String, String> params, final INetWorkCallback<DataDO> callback){
+       zoneApi.haveRead(params).enqueue(new Callback<DataDO>() {
            @Override
-           public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+           public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                callback.success(response.body());
            }
 
            @Override
-           public void onFailure(Call<ResponseBody> call, Throwable t) {
+           public void onFailure(Call<DataDO> call, Throwable t) {
                callback.failure(-1, t.getMessage());
            }
        });
@@ -148,21 +148,21 @@ public class ZoneApi {
         //上报新评论信息的阅读状态
         @FormUrlEncoded
         @POST("zone/newmsgs/haveread.api")
-        Call<ResponseBody> haveRead(@FieldMap Map<String, String> params);
+        Call<DataDO> haveRead(@FieldMap Map<String, String> params);
 
         //朋友圈点赞
         @FormUrlEncoded
         @POST("zone/givetozhan.api")
-        Call<ResponseBody> giveToZhan(@FieldMap Map<String, String> params);
+        Call<DataDO> giveToZhan(@FieldMap Map<String, String> params);
 
         //发表朋友圈
         @FormUrlEncoded
         @POST("zone/creat.api")
-        Call<ResponseBody> createZone(@FieldMap Map<String, String> params);
+        Call<DataDO> createZone(@FieldMap Map<String, String> params);
 
         //朋友圈发表评论
         @FormUrlEncoded
         @POST("zone/postacomment.api")
-        Call<ResponseBody> postComment(@FieldMap Map<String, String> params);
+        Call<DataDO> postComment(@FieldMap Map<String, String> params);
     }
 }

@@ -50,6 +50,8 @@ public class WebFragment extends BaseFragment{
     TextView titleTv;
     @BindView(R.id.backLayout)
     View backLayout;
+    @BindView(R.id.titleBar)
+    View titleBar;
 
     public static WebFragment newInstance(Bundle params) {
         WebFragment webFragment = new WebFragment();
@@ -81,6 +83,10 @@ public class WebFragment extends BaseFragment{
             public void onClick(View view) {
                 if(webView.canGoBack()){
                     webView.goBack();
+                }else {
+                    if(getActivity() != null){
+                        getActivity().finish();
+                    }
                 }
             }
         });
@@ -100,18 +106,18 @@ public class WebFragment extends BaseFragment{
 //        });
         WebViewClient webViewClient = new WebViewClient() {
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if(TextUtils.equals("http://app.cw2009.com/", url)
-                        || TextUtils.equals("http://app.cw2009.com/finder.html", url)
-                        || TextUtils.equals("http://app.cw2009.com/choosemyidentity.html", url) ){
-                    EventBus.getDefault().post(new NavigationControlEvent(true));
-                }else {
-                    EventBus.getDefault().post(new NavigationControlEvent(false));
-                }
-                super.onPageStarted(view, url, favicon);
-            }
-
+//            @Override
+//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                if(TextUtils.equals("http://app.cw2009.com/", url)
+//                        || TextUtils.equals("http://app.cw2009.com/finder.html", url)
+//                        || TextUtils.equals("http://app.cw2009.com/choosemyidentity.html", url) ){
+//                    EventBus.getDefault().post(new NavigationControlEvent(true));
+//                }else {
+//                    EventBus.getDefault().post(new NavigationControlEvent(false));
+//                }
+//                super.onPageStarted(view, url, favicon);
+//            }
+//
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -119,7 +125,7 @@ public class WebFragment extends BaseFragment{
                 if (!TextUtils.isEmpty(title)) {
                     titleTv.setText(title);
                 }
-                backLayout.setVisibility(webView.canGoBack() ? View.VISIBLE : View.GONE);
+             //   backLayout.setVisibility(webView.canGoBack() ? View.VISIBLE : View.GONE);
             }
 
             @Override
@@ -147,6 +153,11 @@ public class WebFragment extends BaseFragment{
             }
         };
         webView.setWebViewClient(webViewClient);
+        handlerView();
+    }
+
+    protected void handlerView(){
+
     }
 
 
@@ -223,6 +234,8 @@ public class WebFragment extends BaseFragment{
 
             cookieManager.setCookie(url,"userid=" + Platform.getInstance().getUsrId());
             cookieManager.setCookie(url, "mobile=" + Platform.getInstance().getMobile());
+            cookieManager.setCookie(url, "uid=" + Platform.getInstance().getUid());
+            cookieManager.setCookie(url, "umobile=" + Platform.getInstance().getUmobile());
             CookieSyncManager.getInstance().sync();
         }
     }

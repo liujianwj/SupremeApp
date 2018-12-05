@@ -10,7 +10,6 @@ import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,6 +18,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.UploadImageResultDO;
 import zs.com.supremeapp.model.UploadVideoResultDO;
 import zs.com.supremeapp.network.HttpClient;
@@ -105,7 +105,7 @@ public class UploadApi {
         });
     }
 
-    public void uploadImage(List<File> files, final INetWorkCallback<ResponseBody> callback){
+    public void uploadImage(List<File> files, final INetWorkCallback<DataDO> callback){
         long time = new Date().getTime();
         RequestBody requestFile =
                 RequestBody.create(MediaType.parse("image/png"), files.get(0));
@@ -123,14 +123,14 @@ public class UploadApi {
         map.put("sn", requestBody1);
         map.put("time", requestBody2);
 
-        uploadApi.uploadImage(map, filePart).enqueue(new Callback<ResponseBody>() {
+        uploadApi.uploadImage(map, filePart).enqueue(new Callback<DataDO>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<DataDO> call, Response<DataDO> response) {
                 callback.success(response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<DataDO> call, Throwable t) {
                 callback.failure(-1, t.getMessage());
             }
         });
@@ -152,7 +152,7 @@ public class UploadApi {
 
         @Multipart
         @POST("upload/photo.api")
-        Call<ResponseBody> uploadImage(@PartMap() Map<String, RequestBody> partMap,  @Part  MultipartBody.Part file);
+        Call<DataDO> uploadImage(@PartMap() Map<String, RequestBody> partMap, @Part  MultipartBody.Part file);
 
     }
 

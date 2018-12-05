@@ -5,7 +5,8 @@ package zs.com.supremeapp.model;
  */
 
 public class LoginResultDO extends BaseDO{
-    MemberDO member;
+    private MemberDO member;
+    private CustomDO custom;
 
     public MemberDO getMember() {
         return member;
@@ -13,6 +14,14 @@ public class LoginResultDO extends BaseDO{
 
     public void setMember(MemberDO member) {
         this.member = member;
+    }
+
+    public CustomDO getCustom() {
+        return custom;
+    }
+
+    public void setCustom(CustomDO custom) {
+        this.custom = custom;
     }
 
     @Override

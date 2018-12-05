@@ -30,4 +30,5 @@
         <attr name="dtlCaptureTop" format="boolean" />
     </declare-styleable>
 
+
 </resources>

@@ -85,6 +85,10 @@
         <activity android:name=".activity.WebActivity" />
         <activity android:name=".activity.MineDreamActivity" />
         <activity android:name=".activity.PhoneBookActivity" />
+        <activity android:name=".activity.ImageCheckActivity" />
+        <activity android:name=".activity.VideoViewActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="portrait" />
         <activity android:name=".activity.FriendNewsDetailActivity"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
 

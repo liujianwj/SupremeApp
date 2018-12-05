@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import okhttp3.ResponseBody;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.adapter.GridImageAdapter;
 import zs.com.supremeapp.api.UploadApi;
 import zs.com.supremeapp.api.ZoneApi;
 import zs.com.supremeapp.manager.FullyGridLayoutManager;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.UploadImageDO;
 import zs.com.supremeapp.model.UploadImageResultDO;
 import zs.com.supremeapp.model.UploadVideoResultDO;
@@ -79,6 +79,23 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
         adapter.setList(selectList);
         adapter.setSelectMax(9);
         recyclerView.setAdapter(adapter);
+
+        if(!DataUtils.isListEmpty(selectList)){
+            boolean isVideo = PictureMimeType.isVideo(selectList.get(0).getPictureType());
+            if(isVideo){
+                uploadImageDOS.clear();
+                Log.i("视频-----》", selectList.get(0).getPath());
+                uploadVideo(new File(selectList.get(0).getPath()));
+            }else {
+                videoPath = null;
+                List<File> files = new ArrayList<>(selectList.size());
+                for (LocalMedia media : selectList) {
+                    Log.i("图片-----》", media.getPath());
+                    files.add(new File(media.getPath()));
+                }
+                uploadImages(files);
+            }
+        }
     }
 
     private GridImageAdapter.onAddPicClickListener onAddPicClickListener = new GridImageAdapter.onAddPicClickListener() {
@@ -215,7 +232,7 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
         if(!DataUtils.isListEmpty(uploadImageDOS)){
             List<String> pics = new ArrayList<>();
             for(UploadImageDO uploadImageDO : uploadImageDOS){
-                pics.add(uploadImageDO.getSource_url());
+                pics.add(uploadImageDO.getId());
             }
             params.put("pics", new Gson().toJson(pics));
         }
@@ -223,9 +240,9 @@ public class FriendStatusPublishActivity extends BaseActivity implements View.On
             params.put("video", videoPath);
         }
         showProcessDialog(true);
-        new ZoneApi().createZone(params, new INetWorkCallback<ResponseBody>() {
+        new ZoneApi().createZone(params, new INetWorkCallback<DataDO>() {
             @Override
-            public void success(ResponseBody responseBody, Object... objects) {
+            public void success(DataDO responseBody, Object... objects) {
                 showProcessDialog(false);
                 setResult(RESULT_OK);
                 finish();

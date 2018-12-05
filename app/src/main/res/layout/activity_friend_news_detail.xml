@@ -3,8 +3,43 @@
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white"
     android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/titleLayout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_45"
+        android:background="@color/common_red"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="@dimen/spacing_10">
+
+        <LinearLayout
+            android:id="@+id/backLayout"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/spacing_8">
+
+            <ImageView
+                android:layout_width="@dimen/spacing_20"
+                android:layout_height="@dimen/spacing_20"
+                android:src="@drawable/back_white" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -48,7 +83,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:singleLine="true"
-                            android:text="我不是要生"
+                            tools:text="我不是要生"
                             android:textColor="@color/black"
                             android:textSize="14sp" />
 
@@ -59,7 +94,7 @@
                             android:layout_marginTop="@dimen/spacing_8"
                             android:ellipsize="end"
                             android:maxLines="5"
-                            android:text="目标 200 赞"
+                            tools:text="目标 200 赞"
                             android:textColor="@color/grey_7d"
                             android:textSize="14sp" />
 
@@ -68,6 +103,7 @@
                             android:layout_width="@dimen/spacing_200"
                             android:layout_height="150dp"
                             android:layout_marginTop="@dimen/spacing_10"
+                            android:visibility="gone"
                             fresco:placeholderImage="@drawable/default_avatar" />
 
                         <zs.com.supremeapp.widget.NoScrollGridView
@@ -85,7 +121,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_8"
                             android:singleLine="true"
-                            android:text="11:09"
+                            tools:text="11:09"
                             android:textColor="@color/grey_7d"
                             android:textSize="12sp" />
 
@@ -106,6 +142,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_5"
+                    android:visibility="gone"
                     android:orientation="vertical">
 
                     <ImageView

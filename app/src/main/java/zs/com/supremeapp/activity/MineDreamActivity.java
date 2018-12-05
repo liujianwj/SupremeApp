@@ -3,14 +3,13 @@ package zs.com.supremeapp.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -42,8 +41,10 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
 
     @BindView(R.id.titleRv)
     RecyclerView titleRv;
-    @BindView(R.id.recycleView)
-    RecyclerView recycleView;
+    @BindView(R.id.myListView)
+    ListView myListView;
+    @BindView(R.id.backLayout)
+    View backLayout;
 
     private DreamApi dreamApi;
     private List<CategoryDO> categoryDOList;
@@ -52,6 +53,7 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
     private DreamRecycleAdapter dreamRecycleAdapter;
     private int currentPage = 1;
     private boolean isNeedRefresh;
+    private boolean isLoadAll = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,32 +61,41 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         SupplySubject.getInstance().attach(this);
         dreamApi = new DreamApi();
-
+        backLayout.setOnClickListener(this);
         dreamDOList = new ArrayList<>();
         dreamRecycleAdapter = new DreamRecycleAdapter(this, dreamDOList);
-        dreamRecycleAdapter.setOnClickListener(this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(OrientationHelper.VERTICAL);
-        recycleView.setLayoutManager(layoutManager);
-        recycleView.addItemDecoration(new DividerItemDecoration(this, LinearLayout.VERTICAL));
-        recycleView.setAdapter(dreamRecycleAdapter);
-        recycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (getLastVisiblePosition() + 1 == dreamRecycleAdapter.getItemCount()) {
-                        currentPage ++;
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Bundle params = new Bundle();
+                params.putString("dreamId", dreamDOList.get(i).getDream_id());
+                Intent intent = new Intent(MineDreamActivity.this, DreamDetailActivity.class);
+                intent.putExtras(params);
+                startActivityForResult(intent, 8888);
+            }
+        });
+        myListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    if(view.getLastVisiblePosition() == view.getCount() - 1){
+                        currentPage++;
                         getDreams(true);
                     }
                 }
-                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
             }
         });
+        myListView.setAdapter(dreamRecycleAdapter);
 
         categoryDOList = new ArrayList<>();
         dreamTitleRecycleAdapter = new DreamTitleRecycleAdapter(this, categoryDOList);
         dreamTitleRecycleAdapter.setOnClickListener(this);
-        layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(OrientationHelper.HORIZONTAL);
         titleRv.setLayoutManager(layoutManager);
         titleRv.setAdapter(dreamTitleRecycleAdapter);
@@ -97,6 +108,7 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
         super.onResume();
         if(isNeedRefresh){
             currentPage = 1;
+            isLoadAll = false;
             isNeedRefresh = false;
             getDreams(true);
         }
@@ -106,42 +118,6 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
     public void onDestroy() {
         SupplySubject.getInstance().detach(this);
         super.onDestroy();
-    }
-
-    /**
-     * 获取最后一条展示的位置
-     *
-     * @return
-     */
-    private int getLastVisiblePosition() {
-        int position;
-        if (recycleView.getLayoutManager() instanceof LinearLayoutManager) {
-            position = ((LinearLayoutManager) recycleView.getLayoutManager()).findLastVisibleItemPosition();
-        } else if (recycleView.getLayoutManager() instanceof GridLayoutManager) {
-            position = ((GridLayoutManager) recycleView.getLayoutManager()).findLastVisibleItemPosition();
-        } else if (recycleView.getLayoutManager() instanceof StaggeredGridLayoutManager) {
-            StaggeredGridLayoutManager layoutManager = (StaggeredGridLayoutManager) recycleView.getLayoutManager();
-            int[] lastPositions = layoutManager.findLastVisibleItemPositions(new int[layoutManager.getSpanCount()]);
-            position = getMaxPosition(lastPositions);
-        } else {
-            position = recycleView.getLayoutManager().getItemCount() - 1;
-        }
-        return position;
-    }
-
-    /**
-     * 获得最大的位置
-     *
-     * @param positions
-     * @return
-     */
-    private int getMaxPosition(int[] positions) {
-        int size = positions.length;
-        int maxPosition = Integer.MIN_VALUE;
-        for (int i = 0; i < size; i++) {
-            maxPosition = Math.max(maxPosition, positions[i]);
-        }
-        return maxPosition;
     }
 
     private void getDreamCategory(){
@@ -167,6 +143,9 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void getDreams(boolean showLoading){
+        if(isLoadAll){
+            return;
+        }
         Map<String, String> params = new HashMap<>();
         params.put("p", String.valueOf(currentPage));
         params.put("cateid", dreamTitleRecycleAdapter.getSelectId());
@@ -178,12 +157,17 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void success(DreamsResultDO dreamsResultDO, Object... objects) {
                 showProcessDialog(false);
-                if(dreamsResultDO != null && !DataUtils.isListEmpty(dreamsResultDO.getList())){
+                if(dreamsResultDO != null){
                     if(currentPage == 1){
                         dreamDOList.clear();
                     }
-                    dreamDOList.addAll(dreamsResultDO.getList());
+                    if(!DataUtils.isListEmpty(dreamsResultDO.getList())){
+                        dreamDOList.addAll(dreamsResultDO.getList());
+                    }
                     dreamRecycleAdapter.notifyDataSetChanged();
+                    if(dreamsResultDO.getPs() != null && dreamsResultDO.getPs().getThispage() == dreamsResultDO.getPs().getAllpages()){
+                        isLoadAll = true;
+                    }
                 }
             }
 
@@ -208,18 +192,11 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
                 dreamTitleRecycleAdapter.setSelectPosition(position);
                 dreamTitleRecycleAdapter.notifyDataSetChanged();
                 currentPage = 1;
+                isLoadAll = false;
                 getDreams(true);
             }
-        }else if(R.id.itemLayout == viewId){
-            Object object = view.getTag();
-            if(object != null ){
-                int pos = (Integer) object;
-                Bundle params = new Bundle();
-                params.putString("dreamId", dreamDOList.get(pos).getDream_id());
-                Intent intent = new Intent(this, DreamDetailActivity.class);
-                intent.putExtras(params);
-                startActivityForResult(intent, 8888);
-            }
+        }else if(viewId == R.id.backLayout){
+            finish();
         }
     }
 
@@ -228,6 +205,7 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 8888 && resultCode == RESULT_OK){
             currentPage = 1;
+            isLoadAll = false;
             getDreams(true);
         }
     }
