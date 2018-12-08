@@ -5,6 +5,7 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
@@ -16,18 +17,22 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import io.rong.eventbus.EventBus;
 import io.rong.imlib.RongIMClient;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.api.DreamApi;
+import zs.com.supremeapp.event.NavigationControlEvent;
 import zs.com.supremeapp.fragment.ChatFragment;
 import zs.com.supremeapp.fragment.DreamFragment;
 import zs.com.supremeapp.fragment.HomeWebFragment;
+import zs.com.supremeapp.fragment.WebFragment;
 import zs.com.supremeapp.manager.ActivityStackManager;
 import zs.com.supremeapp.manager.Platform;
 import zs.com.supremeapp.manager.TabManager;
 import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.ZanPopStatusResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
+import zs.com.supremeapp.utils.DensityUtils;
 import zs.com.supremeapp.widget.GetZanDialog;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener{
@@ -48,6 +53,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.initActivity(R.layout.activity_main);
         super.onCreate(savedInstanceState);
+
+
         mTabHost.setup();
         mTabManager = new TabManager(this, mTabHost, android.R.id.tabcontent);
         initTab();
@@ -62,6 +69,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     //    jianConnect();
         getZanPopStatus();
     }
+
+
 
     private void getZanPopStatus(){
         Map<String, String> params = new HashMap<>();
@@ -90,20 +99,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         tabList.clear();
         Bundle bundle = new Bundle();
         bundle.putString("url", "http://app.cw2009.com/");
-        bundle.putBoolean("showTitleBar", false);
-        mTabManager.addTab(getTabSpecView("home", R.layout.tab_item_home), HomeWebFragment.class, bundle);
+        mTabManager.addTab(getTabSpecView("home", R.layout.tab_item_home), WebFragment.class, bundle);
         mTabManager.addTab(getTabSpecView("chat", R.layout.tab_item_chat), ChatFragment.class, null);
         bundle = new Bundle();
         bundle.putString("url", "http://app.cw2009.com/finder.html");
-        bundle.putBoolean("showTitleBar", true);
+       // bundle.putString("url", "http://app.cw2009.com/finder.html");
         //private final String url = "file:///android_asset/jstest.html";
-       // bundle.putString("url", "file:///android_asset/jstest.html");
-        mTabManager.addTab(getTabSpecView("find", R.layout.tab_item_find), HomeWebFragment.class, bundle);
+        //bundle.putString("url", "file:///android_asset/jstest.html");
+        mTabManager.addTab(getTabSpecView("find", R.layout.tab_item_find), WebFragment.class, bundle);
         mTabManager.addTab(getTabSpecView("dream", R.layout.tab_item_dream), DreamFragment.class, null);
         bundle = new Bundle();
         bundle.putString("url", "http://app.cw2009.com/choosemyidentity.html");
-        bundle.putBoolean("showTitleBar", true);
-        mTabManager.addTab(getTabSpecView("mine", R.layout.tab_item_mine), HomeWebFragment.class, bundle);
+        mTabManager.addTab(getTabSpecView("mine", R.layout.tab_item_mine), WebFragment.class, bundle);
         mTabManager.setOnTabChangListener(new TabManager.OnTabChangListener() {
             @Override
             public boolean change(String tabId, TabManager.TabInfo tabInfo) {
@@ -113,6 +120,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 return false;
             }
         });
+//        mTabHost.getTabWidget().getChildTabViewAt(0).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                currentPosition = 0;
+//                mTabHost.setCurrentTab(currentPosition);
+//            }
+//        });
         mTabHost.getTabWidget().setDividerDrawable(R.color.grey_90);
         currentPosition = 3;
         mTabHost.setCurrentTab(currentPosition);

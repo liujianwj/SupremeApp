@@ -41,14 +41,16 @@ import zs.com.supremeapp.model.DreamDO;
 import zs.com.supremeapp.model.GetOneZanResultDO;
 import zs.com.supremeapp.model.GetoneResultDO;
 import zs.com.supremeapp.model.HaveZansResultDO;
+import zs.com.supremeapp.model.RechargeDO;
+import zs.com.supremeapp.model.RechargeResultDO;
 import zs.com.supremeapp.network.INetWorkCallback;
 import zs.com.supremeapp.observer.ObserverKey;
 import zs.com.supremeapp.observer.SupplySubject;
 import zs.com.supremeapp.utils.DataUtils;
-import zs.com.supremeapp.utils.DateUtils;
 import zs.com.supremeapp.utils.DensityUtils;
 import zs.com.supremeapp.utils.UMHelpUtils;
 import zs.com.supremeapp.widget.CompletedView;
+import zs.com.supremeapp.widget.PayForZanDialog;
 import zs.com.supremeapp.widget.ZanDialog;
 
 /**
@@ -278,7 +280,14 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void failure(int errorCode, String message) {
                 showProcessDialog(false);
-                Toast.makeText(DreamDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                if(errorCode == 300){
+                    PayForZanDialog payForZanDialog =  new PayForZanDialog.Builder(DreamDetailActivity.this)
+                            .setOnClickListener(DreamDetailActivity.this)
+                            .create();
+                    payForZanDialog.show();
+                }else {
+                    Toast.makeText(DreamDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -295,19 +304,31 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
                     if(dreamDO == null){
                         return;
                     }
-                    ZanDialog zanDialog = new ZanDialog.Builder(DreamDetailActivity.this)
-                            .setHeadImgUri(dreamDO.getUser_avatar())
-                            .setHavaZanNum(haveZansResultDO.getMember_zhan().getZhans())
-                            .setOnGetMoreZanListener(new ZanDialog.OnGetMoreZanListener() {
-                                @Override
-                                public void onGetMoreZan() {
-                                    Intent intent = new Intent(DreamDetailActivity.this, WebActivity.class);
-                                    intent.putExtra("url", "http://app.cw2009.com/h5/how_to_get_zhan.html");
-                                    DreamDetailActivity.this.startActivity(intent);
-                                }
-                            })
-                            .setOnClickListener(DreamDetailActivity.this).create();
-                    zanDialog.show();
+                    if(haveZansResultDO.getMember_zhan().getZhans() <= 0){
+                        PayForZanDialog payForZanDialog =  new PayForZanDialog.Builder(DreamDetailActivity.this)
+                                .setOnClickListener(DreamDetailActivity.this)
+                                .create();
+                        payForZanDialog.show();
+                    }else {
+                        ZanDialog zanDialog = new ZanDialog.Builder(DreamDetailActivity.this)
+                                .setHeadImgUri(dreamDO.getUser_avatar())
+                                .setHavaZanNum(haveZansResultDO.getMember_zhan().getZhans())
+                                .setOnGetMoreZanListener(new ZanDialog.OnGetMoreZanListener() {
+                                    @Override
+                                    public void onGetMoreZan() {
+//                                        Intent intent = new Intent(DreamDetailActivity.this, WebActivity.class);
+//                                        intent.putExtra("url", "http://app.cw2009.com/h5/how_to_get_zhan.html");
+//                                        DreamDetailActivity.this.startActivity(intent);
+                                        //go pay
+                                        PayForZanDialog payForZanDialog =  new PayForZanDialog.Builder(DreamDetailActivity.this)
+                                                .setOnClickListener(DreamDetailActivity.this)
+                                                .create();
+                                        payForZanDialog.show();
+                                    }
+                                })
+                                .setOnClickListener(DreamDetailActivity.this).create();
+                        zanDialog.show();
+                    }
                 }
             }
 
@@ -434,7 +455,40 @@ public class DreamDetailActivity extends BaseActivity implements View.OnClickLis
             }
         }else if(R.id.callIMIv == view.getId()){
             RongIM.getInstance().startConversation(this, Conversation.ConversationType.PRIVATE, dreamDO.getUser_id(), dreamDO.getUser_name());
+        }else if(R.id.payTv == view.getId()){ //  支付
+            Object object = view.getTag();
+            if(object instanceof Integer){
+                int payNum = (Integer) object;
+                createOrder(payNum);
+            }
         }
+    }
+
+    private void createOrder(final int payNum){
+        Map<String, String> params = new HashMap<>();
+        params.put("userid", Platform.getInstance().getUsrId());
+        params.put("dreamid", dreamDO.getDream_id());
+        params.put("zhan", payNum+"");
+        showProcessDialog(true);
+        new DreamApi().recharge(params, new INetWorkCallback<RechargeResultDO>() {
+            @Override
+            public void success(RechargeResultDO rechargeDO, Object... objects) {
+                showProcessDialog(false);
+                if(rechargeDO !=null && rechargeDO.getWeixin_pay() != null){
+                    Intent intent = new Intent(DreamDetailActivity.this, PayActivity.class);
+                    intent.putExtra("total", rechargeDO.getWeixin_pay().getTotal_fee());
+                    intent.putExtra("orderId", rechargeDO.getWeixin_pay().getDream_order_id());
+                    DreamDetailActivity.this.startActivity(intent);
+                }
+
+            }
+
+            @Override
+            public void failure(int errorCode, String message) {
+                showProcessDialog(false);
+                Toast.makeText(DreamDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

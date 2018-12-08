@@ -14,15 +14,15 @@
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/dreamImg"
-        android:layout_width="@dimen/spacing_70"
-        android:layout_height="@dimen/spacing_70"
+        android:layout_width="@dimen/spacing_50"
+        android:layout_height="@dimen/spacing_50"
         fresco:roundAsCircle="true"
         fresco:placeholderImage="@drawable/default_avatar" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/headImg"
-        android:layout_width="@dimen/spacing_70"
-        android:layout_height="@dimen/spacing_70"/>
+        android:layout_width="@dimen/spacing_50"
+        android:layout_height="@dimen/spacing_50"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -38,7 +38,7 @@
             android:singleLine="true"
             android:text="我不是要生"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/dreamContentTv"
@@ -48,7 +48,7 @@
             android:singleLine="true"
             android:text="超级喜欢看他们的电影，大家支持下"
             android:textColor="@color/grey_7d"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:text="已收集 266 赞"
                 android:textColor="@color/red_09"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/zanTargetTv"
@@ -72,7 +72,7 @@
                 android:singleLine="true"
                 android:text="目标 200 赞"
                 android:textColor="@color/grey_7d"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
         </LinearLayout>
 
@@ -98,7 +98,7 @@
                 android:layout_marginLeft="@dimen/spacing_3"
                 android:text="催洗洗"
                 android:textColor="@color/black"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -107,7 +107,7 @@
                 android:text="·实名创业者"
                 android:textColor="@color/grey_7d"
                 android:layout_marginLeft="@dimen/spacing_5"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -126,7 +126,7 @@
             android:singleLine="true"
             android:text="7月9日"
             android:textColor="@color/grey_7d"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -135,17 +135,17 @@
 
             <zs.com.supremeapp.widget.CompletedView
                 android:id="@+id/completedView"
-                android:layout_width="@dimen/spacing_40"
-                android:layout_height="@dimen/spacing_40"
+                android:layout_width="@dimen/spacing_35"
+                android:layout_height="@dimen/spacing_35"
                 app:circleColor="@color/white"
                 app:ringBgColor="@color/grey_f1"
                 app:ringColor="@color/common_red"
-                app:strokeWidth="5dp"
-                app:radius="15dp" />
+                app:strokeWidth="3dp"
+                app:radius="10dp" />
 
             <ImageView
-                android:layout_width="@dimen/spacing_20"
-                android:layout_height="@dimen/spacing_20"
+                android:layout_width="@dimen/spacing_18"
+                android:layout_height="@dimen/spacing_18"
                 android:layout_centerInParent="true"
                 android:src="@drawable/dream_gray" />
 
@@ -160,8 +160,6 @@
             android:textColor="@color/grey_7d"
             android:layout_marginTop="@dimen/spacing_2"
             android:textSize="12sp" />
-
-
 
     </LinearLayout>
 

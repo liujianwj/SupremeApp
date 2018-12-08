@@ -306,7 +306,7 @@ public class FriendStatusListActivity extends BaseActivity implements View.OnCli
             finish();
         } else if(viewId == R.id.newsLayout){ // 查看消息列表
             haveRead();
-        } else if(viewId == R.id.singleImg){
+        } else if(viewId == R.id.singleImgLayout){
             Intent intent = new Intent(this, VideoViewActivity.class);
             intent.putExtra("videoUrl", (String) view.getTag());
             this.startActivity(intent);

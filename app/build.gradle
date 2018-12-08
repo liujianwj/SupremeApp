@@ -126,5 +126,7 @@ dependencies {
 
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
+    compile (name: 'alipaySdk-15.5.9-20181123210601', ext: 'aar')
+
 
 }

@@ -9,17 +9,25 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import io.rong.eventbus.EventBus;
@@ -33,6 +41,7 @@ import zs.com.supremeapp.activity.LoginActivity;
 import zs.com.supremeapp.event.NavigationControlEvent;
 import zs.com.supremeapp.manager.ActivityStackManager;
 import zs.com.supremeapp.manager.Platform;
+import zs.com.supremeapp.utils.PayUtils;
 import zs.com.supremeapp.utils.ShareUtils;
 import zs.com.supremeapp.utils.UMHelpUtils;
 
@@ -43,6 +52,8 @@ import zs.com.supremeapp.utils.UMHelpUtils;
 public class WebFragment extends BaseFragment{
 
     private String url;
+    private boolean isResume;
+    private boolean showTitle;
 
     @BindView(R.id.webView)
     WebView webView;
@@ -52,6 +63,8 @@ public class WebFragment extends BaseFragment{
     View backLayout;
     @BindView(R.id.titleBar)
     View titleBar;
+    @BindView(R.id.shareImg)
+    ImageView shareImg;
 
     public static WebFragment newInstance(Bundle params) {
         WebFragment webFragment = new WebFragment();
@@ -59,15 +72,33 @@ public class WebFragment extends BaseFragment{
         return webFragment;
     }
 
+    @Override
+    public void onResume() {
+        isResume = true;
+        Log.d("onResume", "onResume");
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d("onPause", "onPause");
+        super.onPause();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d("onCreateView", "onCreateView");
+        if(!isResume){
+            mContentView = null;
+        }
         if(mContentView == null){
             super.initFragment(R.layout.fragment_mine);
 
             Bundle params = getArguments();
             if(params != null){
                 url = params.getString("url", "");
+                showTitle = params.getBoolean("showTitle", false);
             }
 
             return super.onCreateView(inflater, container, savedInstanceState);
@@ -81,49 +112,54 @@ public class WebFragment extends BaseFragment{
         backLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(webView.canGoBack()){
-                    webView.goBack();
+                if(showTitle){
+                    getActivity().finish();
                 }else {
-                    if(getActivity() != null){
-                        getActivity().finish();
+                    if(webView.canGoBack()){
+//                    WebBackForwardList history = webView.copyBackForwardList();
+//                    String historyUrl = history.getItemAtIndex(history.getCurrentIndex() - 1).getUrl();
+//                    webView.loadUrl(historyUrl);
+                        webView.goBack();
                     }
                 }
+            }
+        });
+        shareImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UMHelpUtils.shareWebToWX(getActivity(),url, titleTv.getText() == null ? "" : titleTv.getText().toString(), url);
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new JavascriptInterfaceListener(getContext()),
                 "android");
-//        webView.setWebViewClient(new WebViewClient(){
-//            @Override
-//            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-//                return super.shouldOverrideUrlLoading(view, request);
-//            }
-//
-//            @Override
-//            public void onPageFinished(WebView view, String url) {
-//                super.onPageFinished(view, url);
-//            }
-//        });
+
         WebViewClient webViewClient = new WebViewClient() {
 
-//            @Override
-//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-//                if(TextUtils.equals("http://app.cw2009.com/", url)
-//                        || TextUtils.equals("http://app.cw2009.com/finder.html", url)
-//                        || TextUtils.equals("http://app.cw2009.com/choosemyidentity.html", url) ){
-//                    EventBus.getDefault().post(new NavigationControlEvent(true));
-//                }else {
-//                    EventBus.getDefault().post(new NavigationControlEvent(false));
-//                }
-//                super.onPageStarted(view, url, favicon);
-//            }
-//
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 String title = view.getTitle();
                 if (!TextUtils.isEmpty(title)) {
                     titleTv.setText(title);
+                }
+                if(showTitle){
+                    titleBar.setVisibility(View.VISIBLE);
+                    backLayout.setVisibility(View.VISIBLE);
+                    shareImg.setVisibility(View.VISIBLE);
+                }else {
+                    if("http://app.cw2009.com/".equals(url)){
+                        titleBar.setVisibility(View.GONE);
+                    }else {
+                        titleBar.setVisibility(View.VISIBLE);
+                    }
+                    if("http://app.cw2009.com/finder.html".equals(url) || "http://app.cw2009.com/choosemyidentity.html".equals(url)){
+                        backLayout.setVisibility(View.GONE);
+                        shareImg.setVisibility(View.GONE);
+                    }else {
+                        backLayout.setVisibility(View.VISIBLE);
+                        shareImg.setVisibility(View.VISIBLE);
+                    }
                 }
              //   backLayout.setVisibility(webView.canGoBack() ? View.VISIBLE : View.GONE);
             }
@@ -147,9 +183,28 @@ public class WebFragment extends BaseFragment{
                 } catch (Exception e) { //防止crash (如果手机上没有安装处理某个scheme开头的url的APP, 会导致crash)
                     return true;//没有安装该app时，返回true，表示拦截自定义链接，但不跳转，避免弹出上面的错误页面
                 }
+                if(showTitle){
+                    titleBar.setVisibility(View.VISIBLE);
+                    backLayout.setVisibility(View.VISIBLE);
+                    shareImg.setVisibility(View.VISIBLE);
+                }else {
+                    if("http://app.cw2009.com/".equals(url)){
+                        titleBar.setVisibility(View.GONE);
+                    }else {
+                        titleBar.setVisibility(View.VISIBLE);
+                    }
+                    if("http://app.cw2009.com/finder.html".equals(url) || "http://app.cw2009.com/choosemyidentity.html".equals(url)){
+                        backLayout.setVisibility(View.GONE);
+                        shareImg.setVisibility(View.GONE);
+                    }else {
+                        backLayout.setVisibility(View.VISIBLE);
+                        shareImg.setVisibility(View.VISIBLE);
+                    }
+                }
                 //处理http和https开头的url
+                synCookies(url);
                 wv.loadUrl(url);
-                return true;
+                return super.shouldOverrideUrlLoading(wv, url);
             }
         };
         webView.setWebViewClient(webViewClient);
@@ -168,6 +223,21 @@ public class WebFragment extends BaseFragment{
             context= c;
         }
 
+        @JavascriptInterface
+        public void aliPay(String payInfo){
+            PayUtils.payWithAlipay(getActivity(), payInfo, new PayUtils.PayCallback() {
+                @Override
+                public void success() {
+                    Toast.makeText(getActivity(), "支付成功", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void failure(Error error, boolean isSync) {
+                    Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
         //调用朋友圈   zoneList()
         @JavascriptInterface
         public void zoneList() {
@@ -183,7 +253,7 @@ public class WebFragment extends BaseFragment{
 
         //调用分享接口  share(title, message)
         @JavascriptInterface
-        public void share(String title, String message){
+        public void share(String title, String message, String url){
             UMHelpUtils.shareWebToWX(getActivity(),url, title, message);
         }
 
@@ -220,6 +290,24 @@ public class WebFragment extends BaseFragment{
     void initData() {
         synCookies(url);
         webView.getSettings().setUserAgentString(formatWebViewUserAgent(webView));
+        if(showTitle){
+            titleBar.setVisibility(View.VISIBLE);
+            backLayout.setVisibility(View.VISIBLE);
+            shareImg.setVisibility(View.VISIBLE);
+        }else {
+            if("http://app.cw2009.com/".equals(url)){
+                titleBar.setVisibility(View.GONE);
+            }else {
+                titleBar.setVisibility(View.VISIBLE);
+            }
+            if("http://app.cw2009.com/finder.html".equals(url) || "http://app.cw2009.com/choosemyidentity.html".equals(url)){
+                backLayout.setVisibility(View.GONE);
+                shareImg.setVisibility(View.GONE);
+            }else {
+                backLayout.setVisibility(View.VISIBLE);
+                shareImg.setVisibility(View.VISIBLE);
+            }
+        }
         webView.loadUrl(url);
     }
 

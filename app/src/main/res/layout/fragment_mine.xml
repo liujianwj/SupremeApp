@@ -41,9 +41,19 @@
             android:textColor="@color/white"
             android:textSize="14sp" />
 
+        <ImageView
+            android:id="@+id/shareImg"
+            android:layout_width="@dimen/spacing_30"
+            android:layout_height="@dimen/spacing_30"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/spacing_10"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            android:src="@drawable/share_white" />
+
     </RelativeLayout>
 
-    <WebView
+    <zs.com.supremeapp.widget.webview.BridgeWebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

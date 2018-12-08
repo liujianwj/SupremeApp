@@ -51,7 +51,7 @@ public class SupremeApplication extends MultiDexApplication{
 
 
         //微信支付
-        IWXAPI iwxapi = WXAPIFactory.createWXAPI(this, "wxc8bdf92a27854741", true);
+     //   IWXAPI iwxapi = WXAPIFactory.createWXAPI(this, "wxc8bdf92a27854741", true);
 
 
         RongIM.setServerInfo("nav.cn.ronghub.com", "up.qbox.me");

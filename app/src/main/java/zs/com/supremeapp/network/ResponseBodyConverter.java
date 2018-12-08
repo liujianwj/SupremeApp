@@ -59,7 +59,7 @@ public class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
 //                default:
 //                    throw new UndefinedStateException();
 //            }
-            throw new ApiException(result.getMsg());
+            throw new ApiException(result.getMsg(), new Throwable(result.getFlag() + ""));
         }
     }
 }

@@ -2,6 +2,7 @@ package zs.com.supremeapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -27,6 +28,7 @@ import zs.com.supremeapp.activity.DreamDetailActivity;
 import zs.com.supremeapp.activity.ImageCheckActivity;
 import zs.com.supremeapp.model.AlbumDO;
 import zs.com.supremeapp.model.ZoneDO;
+import zs.com.supremeapp.utils.AsyncImageLoader;
 import zs.com.supremeapp.utils.DataUtils;
 import zs.com.supremeapp.utils.DateUtils;
 import zs.com.supremeapp.widget.WidgetFlowLayout;
@@ -40,6 +42,7 @@ public class FriendStatusListAdapter extends BaseAdapter {
     private View.OnClickListener onClickListener;
     private SparseArray<View> itemViews = new SparseArray<>();
     private List<ZoneDO> zoneDOList;
+    private AsyncImageLoader asyncImageLoader;
 
     public FriendStatusListAdapter(Context context, List<ZoneDO> zoneDOList) {
         this.context = context;
@@ -71,7 +74,7 @@ public class FriendStatusListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
-        ViewHolder holder;
+        final ViewHolder holder;
         if (view == null) {
             view = LayoutInflater.from(context).inflate(R.layout.item_friend_status_list, viewGroup, false);
             holder = new ViewHolder(view);
@@ -94,20 +97,34 @@ public class FriendStatusListAdapter extends BaseAdapter {
         }
 
         if(!TextUtils.isEmpty(item.getVideo())){
-            holder.singleImg.setVisibility(View.VISIBLE);
+            holder.singleImgLayout.setVisibility(View.VISIBLE);
             holder.imageGridView.setVisibility(View.GONE);
           //  holder.singleImg.setImageURI(item.getVideo());
-            holder.singleImg.setTag(item.getVideo());
-            holder.singleImg.setOnClickListener(onClickListener);
+            if(asyncImageLoader == null){
+                asyncImageLoader = new AsyncImageLoader();
+            }
+            Bitmap bitmap = asyncImageLoader.loadDrawable(item.getVideo(), 200, 150, new AsyncImageLoader.ImageCallback() {
+                @Override
+                public void imageLoaded(Bitmap imageDrawable) {
+                    holder.singleImg.setImageBitmap(imageDrawable);
+                }
+            });
+            if(bitmap == null){
+                holder.singleImg.setImageResource(R.drawable.default_avatar);
+            }else {
+                holder.singleImg.setImageBitmap(bitmap);
+            }
+            holder.singleImgLayout.setTag(item.getVideo());
+            holder.singleImgLayout.setOnClickListener(onClickListener);
         }else {
             if(!DataUtils.isListEmpty(item.getAlbum())) {
-                holder.singleImg.setVisibility(View.GONE);
+                holder.singleImgLayout.setVisibility(View.GONE);
                 holder.imageGridView.setVisibility(View.VISIBLE);
                 FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(context, item.getAlbum());
                 holder.imageGridView.setAdapter(friendStatusImageGridAdapter);
                 holder.imageGridView.setOnItemClickListener(new MyOnItemClickListener(item.getAlbum()));
             }else {
-                holder.singleImg.setVisibility(View.GONE);
+                holder.singleImgLayout.setVisibility(View.GONE);
                 holder.imageGridView.setVisibility(View.GONE);
             }
         }
@@ -192,6 +209,8 @@ public class FriendStatusListAdapter extends BaseAdapter {
         GridView imageGridView;
         @BindView(R.id.contentLayout)
         View contentLayout;
+        @BindView(R.id.singleImgLayout)
+        View singleImgLayout;
 
         public ViewHolder(View itemView) {
             ButterKnife.bind(this, itemView);

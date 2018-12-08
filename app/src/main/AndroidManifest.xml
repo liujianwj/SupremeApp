@@ -38,7 +38,6 @@
         android:allowBackup="true"
         android:icon="@drawable/app_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activity.SplashActivity"
@@ -86,6 +85,7 @@
         <activity android:name=".activity.MineDreamActivity" />
         <activity android:name=".activity.PhoneBookActivity" />
         <activity android:name=".activity.ImageCheckActivity" />
+        <activity android:name=".activity.PayActivity" />
         <activity android:name=".activity.VideoViewActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="portrait" />
@@ -127,6 +127,14 @@
 
         <meta-data android:value="5bc55761f1f5560826000214" android:name="UMENG_APPKEY"/>
         <meta-data android:value="umeng" android:name="UMENG_CHANNEL"/>
+
+        <!--微信支付-->
+        <activity
+            android:name=".wxapi.WXPayEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
 
     </application>
 

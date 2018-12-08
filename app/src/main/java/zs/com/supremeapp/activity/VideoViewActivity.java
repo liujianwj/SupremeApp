@@ -41,6 +41,7 @@ public class VideoViewActivity extends AppCompatActivity {
         backLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                JZVideoPlayer.releaseAllVideos();
                 finish();
             }
         });

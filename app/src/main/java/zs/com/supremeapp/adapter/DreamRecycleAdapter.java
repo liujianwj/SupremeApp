@@ -1,9 +1,7 @@
 package zs.com.supremeapp.adapter;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +18,7 @@ import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import zs.com.supremeapp.R;
 import zs.com.supremeapp.model.DreamDO;
-import zs.com.supremeapp.utils.DataUtils;
-import zs.com.supremeapp.utils.DateUtils;
-import zs.com.supremeapp.utils.DensityUtils;
+import zs.com.supremeapp.utils.AsyncImageLoader;
 import zs.com.supremeapp.widget.CompletedView;
 
 /**
@@ -33,6 +29,7 @@ public class DreamRecycleAdapter extends BaseAdapter {
 
     private Activity context;
     private List<DreamDO> data;
+    private AsyncImageLoader asyncImageLoader;
 
     public DreamRecycleAdapter(Activity context, List<DreamDO> data) {
         this.context = context;
@@ -56,7 +53,7 @@ public class DreamRecycleAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
-        ViewHolder holder;
+        final ViewHolder holder;
         if(view == null){
             view = LayoutInflater.from(context).inflate(R.layout.item_dream_recycle, viewGroup, false);
             holder = new ViewHolder(view);
@@ -69,8 +66,21 @@ public class DreamRecycleAdapter extends BaseAdapter {
         if(!TextUtils.isEmpty(item.getDream_video())){
             holder.headImg.setVisibility(View.VISIBLE);
             holder.dreamImg.setVisibility(View.GONE);
-          //  DataUtils.loadImage(item.getDream_video(), DensityUtils.dip2px(70), DensityUtils.dip2px(70), holder.headImg, context);
-         //   holder.headImg.setImageBitmap(DataUtils.createVideoThumbnail(item.getDream_video(), DensityUtils.dip2px(70), DensityUtils.dip2px(70)));
+            holder.headImg.setTag(item.getDream_video());
+            if(asyncImageLoader == null){
+                asyncImageLoader = new AsyncImageLoader();
+            }
+            Bitmap bitmap = asyncImageLoader.loadDrawable(item.getDream_video(), 50, 50, new AsyncImageLoader.ImageCallback() {
+                @Override
+                public void imageLoaded(Bitmap imageDrawable) {
+                    holder.headImg.setImageBitmap(imageDrawable);
+                }
+            });
+            if(bitmap == null){
+                holder.headImg.setImageResource(R.drawable.default_avatar);
+            }else {
+                holder.headImg.setImageBitmap(bitmap);
+            }
         }else {
             holder.headImg.setVisibility(View.GONE);
             holder.dreamImg.setVisibility(View.VISIBLE);

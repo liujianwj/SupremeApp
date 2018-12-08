@@ -76,6 +76,8 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
     GridView imageGridView;
     @BindView(R.id.backLayout)
     View backLayout;
+    @BindView(R.id.singleImgLayout)
+    View singleImgLayout;
 
 
     private FriendCommentPopup friendCommentPopup;
@@ -130,19 +132,19 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             contentTv.setVisibility(View.GONE);
         }
         if(!TextUtils.isEmpty(item.getVideo())){
-            singleImg.setVisibility(View.VISIBLE);
+            singleImgLayout.setVisibility(View.VISIBLE);
             imageGridView.setVisibility(View.GONE);
-            singleImg.setImageURI(item.getVideo());
-            singleImg.setOnClickListener(this);
+            singleImg.setImageBitmap(DataUtils.createVideoThumbnail(item.getVideo(), DensityUtils.dip2px(200), DensityUtils.dip2px(150)));
+            singleImgLayout.setOnClickListener(this);
         }else {
             if(!DataUtils.isListEmpty(item.getAlbum())) {
-                singleImg.setVisibility(View.GONE);
+                singleImgLayout.setVisibility(View.GONE);
                 imageGridView.setVisibility(View.VISIBLE);
                 FriendStatusImageGridAdapter friendStatusImageGridAdapter = new FriendStatusImageGridAdapter(this, item.getAlbum());
                 imageGridView.setAdapter(friendStatusImageGridAdapter);
                 imageGridView.setOnItemClickListener(new MyOnItemClickListener(item.getAlbum()));
             }else {
-                singleImg.setVisibility(View.GONE);
+                singleImgLayout.setVisibility(View.GONE);
                 imageGridView.setVisibility(View.GONE);
             }
         }
@@ -246,7 +248,7 @@ public class FriendNewsDetailActivity extends BaseActivity implements View.OnCli
             }
         }else if(viewId == R.id.backLayout){
             finish();
-        } else if(viewId == R.id.singleImg){
+        } else if(viewId == R.id.singleImgLayout){
             if(zoneDO != null){
                 Intent intent = new Intent(this, VideoViewActivity.class);
                 intent.putExtra("videoUrl", zoneDO.getVideo());

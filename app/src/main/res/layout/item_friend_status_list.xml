@@ -15,8 +15,8 @@
 
         <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/headImg"
-            android:layout_width="@dimen/spacing_60"
-            android:layout_height="@dimen/spacing_60"
+            android:layout_width="@dimen/spacing_50"
+            android:layout_height="@dimen/spacing_50"
             android:layout_marginLeft="@dimen/spacing_10"
             fresco:placeholderImage="@drawable/default_avatar"
             fresco:roundAsCircle="true" />
@@ -60,12 +60,26 @@
                         android:textColor="@color/grey_7d"
                         android:textSize="14sp" />
 
-                    <com.facebook.drawee.view.SimpleDraweeView
-                        android:id="@+id/singleImg"
-                        android:layout_width="@dimen/spacing_200"
-                        android:layout_height="150dp"
-                        android:layout_marginTop="@dimen/spacing_10"
-                        fresco:placeholderImage="@drawable/default_avatar" />
+                    <RelativeLayout
+                        android:id="@+id/singleImgLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone">
+
+                        <com.facebook.drawee.view.SimpleDraweeView
+                            android:id="@+id/singleImg"
+                            android:layout_width="@dimen/spacing_200"
+                            android:layout_height="150dp"
+                            android:layout_marginTop="@dimen/spacing_10"
+                            fresco:placeholderImage="@drawable/default_avatar" />
+
+                        <ImageView
+                            android:id="@+id/playImage"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/video_play" />
+                    </RelativeLayout>
 
                     <zs.com.supremeapp.widget.NoScrollGridView
                         android:id="@+id/imageGridView"

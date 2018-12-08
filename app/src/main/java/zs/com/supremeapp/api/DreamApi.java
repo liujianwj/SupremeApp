@@ -11,10 +11,13 @@ import retrofit2.http.POST;
 import zs.com.supremeapp.model.CategoryResultDO;
 import zs.com.supremeapp.model.DataDO;
 import zs.com.supremeapp.model.DreamCommentResultDO;
+import zs.com.supremeapp.model.DreamPayResultDO;
 import zs.com.supremeapp.model.DreamsResultDO;
 import zs.com.supremeapp.model.GetOneZanResultDO;
 import zs.com.supremeapp.model.GetoneResultDO;
 import zs.com.supremeapp.model.HaveZansResultDO;
+import zs.com.supremeapp.model.RechargeDO;
+import zs.com.supremeapp.model.RechargeResultDO;
 import zs.com.supremeapp.model.TopicResultDO;
 import zs.com.supremeapp.model.ZanPopStatusResultDO;
 import zs.com.supremeapp.network.HttpClient;
@@ -65,6 +68,21 @@ public class DreamApi {
     public void getDreams(Map<String, String> params, final INetWorkCallback<DreamsResultDO> callback){
 
         dreamApi.getDreams(params).enqueue(new Callback<DreamsResultDO>() {
+            @Override
+            public void onResponse(Call<DreamsResultDO> call, Response<DreamsResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<DreamsResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void getMyDreams(Map<String, String> params, final INetWorkCallback<DreamsResultDO> callback){
+
+        dreamApi.getMyDreams(params).enqueue(new Callback<DreamsResultDO>() {
             @Override
             public void onResponse(Call<DreamsResultDO> call, Response<DreamsResultDO> response) {
                 callback.success(response.body());
@@ -148,7 +166,16 @@ public class DreamApi {
 
             @Override
             public void onFailure(Call<DataDO> call, Throwable t) {
-                callback.failure(-1, t.getMessage());
+                int errorCode = -1;
+                try{
+                    if(t.getCause() != null){
+                        errorCode = Integer.parseInt(t.getCause().getMessage());
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+                callback.failure(errorCode, t.getMessage());
             }
         });
     }
@@ -213,6 +240,35 @@ public class DreamApi {
         });
     }
 
+    public void recharge(Map<String, String> params, final INetWorkCallback<RechargeResultDO> callback){
+        dreamApi.recharge(params).enqueue(new Callback<RechargeResultDO>() {
+            @Override
+            public void onResponse(Call<RechargeResultDO> call, Response<RechargeResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<RechargeResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
+    public void dreamWXPay(Map<String, String> params, final INetWorkCallback<DreamPayResultDO> callback){
+
+        dreamApi.dreamWXPay(params).enqueue(new Callback<DreamPayResultDO>() {
+            @Override
+            public void onResponse(Call<DreamPayResultDO> call, Response<DreamPayResultDO> response) {
+                callback.success(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<DreamPayResultDO> call, Throwable t) {
+                callback.failure(-1, t.getMessage());
+            }
+        });
+    }
+
 
     public interface IDreamApi{
 
@@ -227,6 +283,10 @@ public class DreamApi {
         @FormUrlEncoded
         @POST("dreams.api")
         Call<DreamsResultDO> getDreams(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("my_dreams.api")
+        Call<DreamsResultDO> getMyDreams(@FieldMap Map<String, String> params);
 
         @FormUrlEncoded
         @POST("dreams/getone.api")
@@ -267,5 +327,13 @@ public class DreamApi {
         @FormUrlEncoded
         @POST("dreams/getone/zhan.api")
         Call<GetOneZanResultDO> getOneZan(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("dream/recharge.api")
+        Call<RechargeResultDO> recharge(@FieldMap Map<String, String> params);
+
+        @FormUrlEncoded
+        @POST("pay/wx/dream_pay.api")
+        Call<DreamPayResultDO> dreamWXPay(@FieldMap Map<String, String> params);
     }
 }

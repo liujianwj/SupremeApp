@@ -23,7 +23,11 @@ public class WebActivity extends BaseActivity{
             webFragment = (WebFragment) getSupportFragmentManager()
                     .getFragment(savedInstanceState, "WebFragment");
         } else {
-            webFragment = WebFragment.newInstance(getIntent().getExtras());
+            Bundle bundle = getIntent().getExtras();
+            if(bundle != null){
+                bundle.putBoolean("showTitle", true);
+            }
+            webFragment = WebFragment.newInstance(bundle);
         }
 
         getSupportFragmentManager().beginTransaction()

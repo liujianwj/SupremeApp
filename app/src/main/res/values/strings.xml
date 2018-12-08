@@ -36,4 +36,11 @@
     <string name="dream_pic_input_tip">请添加照片或视频内容</string>
     <string name="dream_time_input_tip">请选择期望日期</string>
     <string name="dream_share_content">至上app，记录每一个平凡人生的梦想征程，通过点赞鼓励激励圆梦人完成梦想，传递有梦最美，希望相随</string>
+
+    <string name="pay_cancel_payment">您已取消付款</string>
+    <string name="pay_failure_message">错误信息</string>
+    <string name="pay_pay_failure">支付失败</string>
+    <string name="pay_pay_failure_retry">支付失败，请重试</string>
+    <string name="pay_result_in_confirm">支付结果确认中</string>
+    <string name="pay_wx_no_install">微信未安装</string>
 </resources>

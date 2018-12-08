@@ -153,7 +153,7 @@ public class MineDreamActivity extends BaseActivity implements View.OnClickListe
         if(showLoading){
             showProcessDialog(true);
         }
-        dreamApi.getDreams(params, new INetWorkCallback<DreamsResultDO>() {
+        dreamApi.getMyDreams(params, new INetWorkCallback<DreamsResultDO>() {
             @Override
             public void success(DreamsResultDO dreamsResultDO, Object... objects) {
                 showProcessDialog(false);

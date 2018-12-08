@@ -9,12 +9,19 @@
          function callAndroid(){
         // 由于对象映射，所以调用test对象等于调用Android映射的对象
           //  android.zoneList();
-              android.loginOut();
+              android.zoneList();
+         }
+
+         function gobaidu(){
+         	window.location.href='http://app.cw2009.com/toutiao.html';
          }
       </script>
    </head>
    <body>
       //点击按钮则调用callAndroid函数
       <button type="button" id="button1" onclick="callAndroid()"></button>
+
+      //点击按钮则调用callAndroid函数
+      <button type="button" id="button1" onclick="gobaidu()"></button>
    </body>
 </html>
